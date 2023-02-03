@@ -1,0 +1,3 @@
+---
+  url_root: https://dev-nginx.sd4h.ca:8443
+  session_file: ~/.pt_cli
