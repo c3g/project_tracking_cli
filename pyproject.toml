@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "project_tracking_cli"
+name = "pt_cli"
 version = "0.0.1"
 authors = [
   { name="P-O Quirion", email="po.quirion@mcgill.ca" },
@@ -20,7 +20,12 @@ classifiers = [
 dependencies = [
     "pyyaml>=6.0",
     "requests>=2.28",
+    "beautifulsoup4>=4.12",
 ]
+
+[project.scripts]
+pt_cli =  "pt_cli.pt_cli:main"
+
 
 [project.urls]
 "Homepage" = "https://github.com/C3G/pt_cli"

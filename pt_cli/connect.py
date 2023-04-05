@@ -1,12 +1,13 @@
 import getpass
 import json
-import pathlib
 import pickle
 import re
-import sys
 import weakref
+import logging
 
 import requests
+
+logger = logging.getLogger(__name__)
 
 
 class OAuthNego():
@@ -60,11 +61,11 @@ class OAuthNego():
         :return:
         """
         params = {}
+        decoded_content = r_get.content.decode()
         for k in self.PARAMS:
-            params[k] = re.search('{}=(.*?)&'.format(k).encode(),
-                                  r_get.content).groups()[0].decode()
-        post_url = re.search('(https://.*?)\?'.format(k).encode(),
-                             r_get.content).groups()[0].decode()
+            params[k] = re.search('{}=(.*?)&'.format(k),
+                                  decoded_content).groups()[0]
+        post_url = re.search('(https://.*?)\?', decoded_content).groups()[0]
         return self.s.post(post_url, params=params, data=self.prompt_pw())
 
     def maybe_json(self, data):
@@ -93,7 +94,7 @@ class OAuthNego():
         if self.REDIRECT in r_post.url:
             r_post = self.connect(r_post)
 
-        return self.maybe_json(r_post)
+        return self.maybe_json(r_post.text)
 
 
 class Pt_Cli(OAuthNego):
@@ -108,38 +109,19 @@ class Pt_Cli(OAuthNego):
     def projects(self):
         return self.get("projects")
 
+    def help(self):
+        return self.get("help")
+
 class Moh_Cli(Pt_Cli):
     """
     Implementation of the cli for specific projects
     """
 
-    def create_project(self, name='MOH'):
-        path = f'project/create/{name}'
+    def create_project(self, name):
+        name = 'MOH-Q'
+        logging
+        path = f'admin/create_project/{name}'
         return self.get(path=path)
 
 
-def main(args=None):
-    if args is None:
-        args = sys.argv[1:]
 
-    import argparse
-
-
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument('--data', help='json file or string to use in a post')
-    parser.add_argument('--data', help='json file or string to use in a post')
-
-
-if __name__ == '__main__':
-    import yaml
-    with open('connect.yaml') as fp:
-        config = yaml.load(fp, Loader=yaml.SafeLoader)
-
-    session_file = pathlib.Path(config['session_file']).expanduser()
-    connect = Moh_Cli(config['url_root'], session_file=session_file)
-
-    data = connect.get('')
-    print(data)
-    #data = connect.create_project('new_project')
-    #print(data)
