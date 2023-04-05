@@ -27,8 +27,9 @@ def main(args=None, set_logger=True):
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--url_root', help='Where the server is location, will overwirte '
-                                           'value in the connect.yaml config file')
+    parser.add_argument('--url_root', help='Where the server is located, will overwrite '
+                                           'value in the ~/.config/pt_cli/connect.yaml config file.'
+                                           'Should be of the "http(s)://location" form')
 
     group = parser.add_mutually_exclusive_group()
     group.add_argument('--data-file', help='file use in a post', type = argparse.FileType('r'),default=None)
@@ -51,7 +52,7 @@ def main(args=None, set_logger=True):
         logging.basicConfig(format='%(levelname)s:%(message)s', level=parsed.loglevel, stream=sys.stderr)
 
     config_files = ['~/.config/pt_cli/connect.yaml', './connect.yaml']
-    config = {}
+    config = {'session_file': '~/.pt_cli'}
     i = 0
     while i < len(config_files):
         file = os.path.expanduser(config_files[i])
