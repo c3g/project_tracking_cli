@@ -6,7 +6,7 @@ import argparse
 class AddCMD:
     __tool_name__ = 'tool_name'
     """
-    {} is the basic class to write pt_cli tools 
+    {} is the basic class to write pt_cli tools
     Write the tool help as a string here
     """.format(__tool_name__)
     def __init__(self, connection_obj, subparser=argparse.ArgumentParser().add_subparsers()):
@@ -104,5 +104,3 @@ class ReadsetFile(AddCMD):
             objet_name = False
 
         getattr(self, parsed_args.input_type)
-
-
