@@ -1,4 +1,4 @@
 ---
   url_root: https://portal-c3g.dev-sd4h.ca
-#  url_root: https://fangorn.sd4h.ca
   session_file: ~/.pt_cli
+  project: moh-q

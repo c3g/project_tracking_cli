@@ -99,11 +99,14 @@ class OAuthNego():
 
 class Pt_Cli(OAuthNego):
     """
-    Implementation of the cli for specific projects
+    The cli always connect to a specific project, convenience method can be implemented here.
     """
+    def __init__(self, project_name, *args, **kwargs):
+        super(Pt_Cli, self).__init__(*args, **kwargs)
+        self.project_name = project_name
 
-    def create_project(self, name):
-        path = f'project/create/{name}'
+    def create_project(self):
+        path = f'admin/create_project/{self.project_name}'
         return self.get(path=path)
 
     def projects(self):
@@ -112,16 +115,7 @@ class Pt_Cli(OAuthNego):
     def help(self):
         return self.get("help")
 
-class Moh_Cli(Pt_Cli):
-    """
-    Implementation of the cli for specific projects
-    """
 
-    def create_project(self, name):
-        name = 'MOH-Q'
-        logging
-        path = f'admin/create_project/{name}'
-        return self.get(path=path)
 
 
 
