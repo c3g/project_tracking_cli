@@ -71,6 +71,7 @@ class ReadsetFile(AddCMD):
     def __init__(self, *args, **kwargs):
         super(ReadsetFile, self).__init__(*args, **kwargs)
         self. json_list = None
+        self.output_file = None
 
     def help(self):
         return "Will return a Genpipes readset file in a csv format"
@@ -87,7 +88,7 @@ class ReadsetFile(AddCMD):
 
         self.get(f'project/{self.project_name}/digest_readset')
 
-    def sample(self):
+    def samples(self):
         '''
         organise stuff here when sample is in the list
         :return:
@@ -97,6 +98,7 @@ class ReadsetFile(AddCMD):
 
     def func(self, parsed_args):
         self.json_list = json.loads(self.data(parsed_args))
+        self.output_file = parsed_args.output
 
         objet_name = True
         if isinstance(int, self.json_list[0]):
