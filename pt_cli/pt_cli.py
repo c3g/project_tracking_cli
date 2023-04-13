@@ -123,10 +123,14 @@ def main(args=None, set_logger=True):
 
 
     # Calling the api:
-    subparsed.func(subparsed)
-    # make sure pipes are not broken
-    sys.stdout.write('\n')
-    sys.stdout.flush()
+    try:
+        subparsed.func(subparsed)
+        # make sure pipes are not broken
+        sys.stdout.write('\n')
+        sys.stdout.flush()
+    except AttributeError:
+        # a subcommand needs to be provided
+        parser.print_help()
 
 
 

@@ -105,12 +105,8 @@ class Pt_Cli(OAuthNego):
         super(Pt_Cli, self).__init__(*args, **kwargs)
         self.project_name = project_name
 
-    def create_project(self):
-        path = f'admin/create_project/{self.project_name}'
-        return self.get(path=path)
-
     def projects(self):
-        return self.get("projects")
+        return self.get("project")
 
     def help(self):
         return self.get("help")
