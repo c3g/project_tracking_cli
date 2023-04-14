@@ -120,11 +120,10 @@ def main(args=None, set_logger=True):
 
 
     subparsed = parser.parse_args(args=args)
-
+    subparsed.func(subparsed)
 
     # Calling the api:
     try:
-        subparsed.func(subparsed)
         # make sure pipes are not broken
         sys.stdout.write('\n')
         sys.stdout.flush()

@@ -23,7 +23,6 @@ class AddCMD:
 
     def data(self, parsed_args, error_if_missing=True):
         """
-
         :param parsed_args: argument form the command lines
         :param error_if_missing: Will raise Error when true and no data is provided
         :return: the data as a string
@@ -32,16 +31,18 @@ class AddCMD:
         if parsed_args.data:
             return parsed_args.data
         elif parsed_args.data_file:
-            return parsed_args.read()
+            data = parsed_args.data_file.read()
+            parsed_args.data_file.close()
+            return data
         elif error_if_missing:
             raise ValueError(f'Data inputs is needed for the "{self.__tool_name__}" subcommnad')
 
 
-    def post(self,path, data):
-        self.connection_obj.post(path, data=data)
+    def post(self, path, data):
+        return self.connection_obj.post(path, data=data)
 
     def get(self, path):
-        self.connection_obj.get(path)
+        return self.connection_obj.get(path)
 
     def help(self):
         """
@@ -69,27 +70,7 @@ class AddCMD:
 
 class ReadsetFile(AddCMD):
     __tool_name__ = 'readset_file'
-    def __init__(self, *args, **kwargs):
-        super(ReadsetFile, self).__init__(*args, **kwargs)
-        self.json_list = None
-        self.output_file = None
-
-    def help(self):
-        return "Will return a Genpipes readset file in a csv format"
-
-    def arguments(self):
-        # self.parser.add_argument('input_type', choices=['readsets', 'samples'])
-        self.parser.add_argument('output', default="readset_file.tsv")
-
-    def readset_file(self):
-        '''
-        organise stuff here when readset is in the list
-        :return:
-        '''
-        self.get(f'project/{self.project_name}/digest_readset_file')
-
-    def json_to_readset_file(self):
-        readset_header = [
+    READSET_HEADER = [
             "Sample",
             "Readset",
             "LibraryType",
@@ -104,19 +85,36 @@ class ReadsetFile(AddCMD):
             "FASTQ2",
             "BAM"
             ]
+    def __init__(self, *args, **kwargs):
+        super(ReadsetFile, self).__init__(*args, **kwargs)
+        self.readsets_samples_input = None
+        self.output_file = None
+
+    def help(self):
+        return "Will return a Genpipes readset file in a csv format"
+
+    def arguments(self):
+        # self.parser.add_argument('input_type', choices=['readsets', 'samples'])
+        self.parser.add_argument('--output', '-o', default="readset_file.tsv")
+
+    @property
+    def readset_file(self):
+        '''
+        organise stuff here when readset is in the list
+        :return:
+        '''
+        return json.loads(self.post(f'project/{self.project_name}/digest_readset_file', data=self.readsets_samples_input))
+
+    def json_to_readset_file(self):
         with open(self.output_file, "w", encoding="utf-8") as out_readset_file:
-            tsv_writer = csv.DictWriter(out_readset_file, delimiter='\t', fieldnames=readset_header)
+            tsv_writer = csv.DictWriter(out_readset_file, delimiter='\t', fieldnames=self.READSET_HEADER)
             tsv_writer.writeheader()
-            for readset_line in readset_lines:
+            breakpoint()
+            for readset_line in self.readset_file:
                 tsv_writer.writerow(readset_line)
 
     def func(self, parsed_args):
-        self.json_list = json.loads(self.data(parsed_args))
+        self.readsets_samples_input = json.dumps(self.data(parsed_args))
         self.output_file = parsed_args.output
 
-        objet_name = True
-        if isinstance(int, self.json_list[0]):
-            # using objects id
-            objet_name = False
-
-        # getattr(self, parsed_args.input_type)
+        self.json_to_readset_file()
