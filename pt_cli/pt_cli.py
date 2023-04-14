@@ -30,7 +30,7 @@ def main(args=None, set_logger=True):
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--url_root', help='Where the server is located, will overwrite '
+    parser.add_argument('--url-root', help='Where the server is located, will overwrite '
                                            'value in the ~/.config/pt_cli/connect.yaml config file.'
                                            'Should be of the "http(s)://location" form')
     parser.add_argument('--project', help='project you are working on', default='MOH-Q')

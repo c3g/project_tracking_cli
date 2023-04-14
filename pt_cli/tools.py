@@ -1,6 +1,7 @@
 import sys
 import json
 import argparse
+import csv
 
 
 class AddCMD:
@@ -70,31 +71,44 @@ class ReadsetFile(AddCMD):
     __tool_name__ = 'readset_file'
     def __init__(self, *args, **kwargs):
         super(ReadsetFile, self).__init__(*args, **kwargs)
-        self. json_list = None
+        self.json_list = None
         self.output_file = None
 
     def help(self):
         return "Will return a Genpipes readset file in a csv format"
 
     def arguments(self):
-        self.parser.add_argument('input_type', choices=['readsets', 'samples'])
-        self.parser.add_argument('output', default="readset_file.csv")
+        # self.parser.add_argument('input_type', choices=['readsets', 'samples'])
+        self.parser.add_argument('output', default="readset_file.tsv")
 
-    def readsets(self):
+    def readset_file(self):
         '''
         organise stuff here when readset is in the list
         :return:
         '''
+        self.get(f'project/{self.project_name}/digest_readset_file')
 
-        self.get(f'project/{self.project_name}/digest_readset')
-
-    def samples(self):
-        '''
-        organise stuff here when sample is in the list
-        :return:
-        '''
-
-        self.get(f'project/{self.project_name}/digest_sample')
+    def json_to_readset_file(self):
+        readset_header = [
+            "Sample",
+            "Readset",
+            "LibraryType",
+            "RunType",
+            "Run",
+            "Lane",
+            "Adapter1",
+            "Adapter2",
+            "QualityOffset",
+            "BED",
+            "FASTQ1",
+            "FASTQ2",
+            "BAM"
+            ]
+        with open(self.output_file, "w", encoding="utf-8") as out_readset_file:
+            tsv_writer = csv.DictWriter(out_readset_file, delimiter='\t', fieldnames=readset_header)
+            tsv_writer.writeheader()
+            for readset_line in readset_lines:
+                tsv_writer.writerow(readset_line)
 
     def func(self, parsed_args):
         self.json_list = json.loads(self.data(parsed_args))
@@ -105,4 +119,4 @@ class ReadsetFile(AddCMD):
             # using objects id
             objet_name = False
 
-        getattr(self, parsed_args.input_type)
+        # getattr(self, parsed_args.input_type)
