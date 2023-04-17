@@ -121,15 +121,13 @@ def main(args=None, set_logger=True):
 
     subparsed = parser.parse_args(args=args)
 
-
-    # Calling the api:
-    try:
+    # a subcommand needs to be provided
+    # for func to exist
+    if getattr(subparsed, 'func', None):
         subparsed.func(subparsed)
-        # make sure pipes are not broken
         sys.stdout.write('\n')
         sys.stdout.flush()
-    except AttributeError:
-        # a subcommand needs to be provided
+    else:
         parser.print_help()
 
 
