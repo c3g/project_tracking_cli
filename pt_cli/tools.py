@@ -1,8 +1,10 @@
+import logging
 import sys
 import json
 import argparse
 import csv
 
+logger = logging.getLogger(__name__)
 
 class AddCMD:
     __tool_name__ = 'tool_name'
@@ -124,6 +126,7 @@ class ReadsetFile(AddCMD):
             tsv_writer.writeheader()
             for readset_line in self.readset_file:
                 tsv_writer.writerow(readset_line)
+            logger.info(f"Readsetfile written to {self.output_file}")
 
     def func(self, parsed_args):
         super().func(parsed_args)

@@ -93,10 +93,13 @@ def main(args=None, set_logger=True):
     help_parser.set_defaults(func=help)
 
     def route(parsed_local):
+        url = parsed_local.url.replace('//', '/').strip('/')
         if post_data:
-            response = connector_session.post(parsed_local.url, post_data)
+            logger.debug('POST to {}'.format(url))
+            response = connector_session.post(url, post_data)
         else:
-            response = connector_session.get(parsed_local.url)
+            logger.debug('Get to {}'.format(url))
+            response = connector_session.get(url)
 
         if isinstance(response, str):
             soup = bs4.BeautifulSoup(response, features="lxml")
