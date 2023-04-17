@@ -7,8 +7,9 @@ import csv
 class AddCMD:
     __tool_name__ = 'tool_name'
     """
-    {} is the basic class to write pt_cli tools
-    Write the tool help as a string here
+    AssCMD is the basic class to write pt_cli tools.
+    To create a new subcommand, create a child class 
+    and write help(), arguments() and func() methods 
     """.format(__tool_name__)
 
     _POSTED_DATA = None
@@ -59,10 +60,10 @@ class AddCMD:
 
     def arguments(self):
         """
-        add your arguments to self.parser here
+        Add your arguments to self.parser here.
         :return:
         """
-        raise NotImplementedError
+        pass
 
     def func(self, parsed_args):
         """ This function is the entry point of the tool/object. It receives parsed arguments.
@@ -127,6 +128,5 @@ class ReadsetFile(AddCMD):
     def func(self, parsed_args):
         super().func(parsed_args)
         self.readsets_samples_input = self.data()
-        self.output_file = self.parsed_args.output
-
+        self.output_file = parsed_args.output
         self.json_to_readset_file()
