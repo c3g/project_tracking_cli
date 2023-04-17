@@ -94,7 +94,6 @@ class ReadsetFile(AddCMD):
         return "Will return a Genpipes readset file in a csv format"
 
     def arguments(self):
-        # self.parser.add_argument('input_type', choices=['readsets', 'samples'])
         self.parser.add_argument('--output', '-o', default="readset_file.tsv")
 
     @property
