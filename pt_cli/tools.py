@@ -103,13 +103,12 @@ class ReadsetFile(AddCMD):
         organise stuff here when readset is in the list
         :return:
         '''
-        return json.loads(self.post(f'project/{self.project_name}/digest_readset_file', data=self.readsets_samples_input))
+        return self.post(f'project/{self.project_name}/digest_readset_file', data=json.loads(self.readsets_samples_input))
 
     def json_to_readset_file(self):
         with open(self.output_file, "w", encoding="utf-8") as out_readset_file:
             tsv_writer = csv.DictWriter(out_readset_file, delimiter='\t', fieldnames=self.READSET_HEADER)
             tsv_writer.writeheader()
-            breakpoint()
             for readset_line in self.readset_file:
                 tsv_writer.writerow(readset_line)
 
