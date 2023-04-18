@@ -12,7 +12,10 @@ import yaml
 
 try:
     from pt_cli.connect import Pt_Cli
-    from pt_cli.tools import ReadsetFile
+    from pt_cli.tools import (
+        ReadsetFile,
+        PairFile
+        )
 except ModuleNotFoundError:
     from connect import Pt_Cli
     from tools import ReadsetFile
@@ -120,6 +123,8 @@ def main(args=None, set_logger=True):
 
 
     ReadsetFile(connection_obj=connector_session, subparser=subparser)
+
+    PairFile(connection_obj=connector_session, subparser=subparser)
 
 
     subparsed = parser.parse_args(args=args)
