@@ -32,8 +32,8 @@ def main(args=None, set_logger=True):
 
     parser.add_argument('--url-root', help='Where the server is located, will overwrite '
                                            'value in the ~/.config/pt_cli/connect.yaml config file.'
-                                           'Should be of the "http(s)://location" form')
-    parser.add_argument('--project', help='project you are working on', default='MOH-Q')
+                                           'Should be of the "http(s)://location" form', default=None)
+    parser.add_argument('--project', help='project you are working on', default=None)
 
     group = parser.add_mutually_exclusive_group()
     group.add_argument('--data-file', help='file use in a post', type=argparse.FileType('r'), default=None)
@@ -51,15 +51,18 @@ def main(args=None, set_logger=True):
         post_data = parsed.data_file.read()
         parsed.data_file.close()
 
-    url_root = parsed.url_root
-    project = parsed.project
-
     if set_logger:
         # logs all go to stderr so only the payload from the server is sent to stdout.
         logging.basicConfig(format='%(levelname)s:%(message)s', level=parsed.loglevel, stream=sys.stderr)
 
+    # Cli Configuration setup
+    # Default
+    config = {"url_root": "https://c3g-portal.sd4h.ca",
+               "session_file": "~/.pt_cli",
+               "project": "moh-q"}
+
+    # Config file overwrite
     config_files = ['~/.config/pt_cli/connect.yaml', './connect.yaml']
-    config = {'session_file': '~/.pt_cli'}
     i = 0
     while i < len(config_files):
         file = os.path.expanduser(config_files[i])
@@ -70,11 +73,11 @@ def main(args=None, set_logger=True):
                 if extra_config:
                     config_files.insert(i, extra_config)
         i += 1
-
-    if project:
-        config['project'] = project
-    if url_root:
-        config['url_root'] = url_root
+    # Command line overwrite
+    if parsed.project:
+        config['project'] = parsed.project
+    if parsed.url_root:
+        config['url_root'] = parsed.url_root
     url_root = urllib.parse.urlparse(config['url_root'])
 
     if not url_root.scheme:
