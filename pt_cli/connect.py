@@ -36,6 +36,7 @@ class OAuthNego():
         # save session at the end
         self._finalizer = \
             weakref.finalize(self, self.save_session, self.session_file, self.s)
+        data_type = None
 
     @classmethod
     def save_session(cls, file, session):
@@ -70,8 +71,14 @@ class OAuthNego():
 
     def maybe_json(self, data):
         try:
-            return json.loads(data)
+            loads =  json.loads(data)
+            self.data_type = 'json'
+            return loads
         except json.decoder.JSONDecodeError:
+            if 'html' in data.lower():
+                self.data_type = 'html'
+            else:
+                self.data_type = 'str'
             return data
 
     def get(self, path):
@@ -110,6 +117,7 @@ class Pt_Cli(OAuthNego):
 
     def help(self):
         return self.get("help")
+
 
 
 
