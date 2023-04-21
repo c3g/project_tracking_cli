@@ -1,5 +1,6 @@
 # pt-cli
-The c3g [pt_cli](https://github.com/c3g/project_tracking_cli) is the c3g [project tracking](https://github.com/c3g/project_tracking) client!
+
+This is the c3g database [client](https://github.com/c3g/project_tracking_cli)  to talk with [project tracking](https://github.com/c3g/project_tracking), the c3g database api!
 
 To install:
 
