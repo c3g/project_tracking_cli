@@ -6,3 +6,7 @@ venv
 __pycache__/
 
 .DS_Store
+
+# Tests
+pair_file.csv
+readset_file.tsv
