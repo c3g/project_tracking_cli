@@ -42,6 +42,7 @@ def main(args=None, set_logger=True):
     group.add_argument('--data-file', help='file use in a post', type=argparse.FileType('r'), default=None)
     group.add_argument('--data', help='string to use in a post', default=None)
     parser.add_argument('--loglevel', help='set log level', choices=logging._levelToName.values(), default='INFO')
+    parser.add_argument('--info', help='get current client config', action='store_true')
 
     # The cli help is handled later once all option and command are stored
     parsed = parser.parse_known_args(args=[a for a in args if a not in ['-h', '--help']])[0]
@@ -86,8 +87,15 @@ def main(args=None, set_logger=True):
     if not url_root.scheme:
         url_root._replace(scheme='http')
 
+    if parsed.info:
+        sys.stdout.write('Config:\n')
+        for k, v in config.items():
+            sys.stdout.write(f'{k}: {v}\n')
+        sys.exit(0)
+
     session_file = pathlib.Path(config['session_file']).expanduser()
     connector_session = Pt_Cli(config['project'], url_root.geturl(), session_file=session_file)
+
 
     subparser = parser.add_subparsers(help='use the api routes directly')
 
