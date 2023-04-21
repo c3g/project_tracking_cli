@@ -81,8 +81,6 @@ class AddCMD:
         self.parsed_args = parsed_args
 
 
-
-
 class ReadsetFile(AddCMD):
     __tool_name__ = 'readset_file'
     READSET_HEADER = [
@@ -106,7 +104,7 @@ class ReadsetFile(AddCMD):
         self.output_file = None
 
     def help(self):
-        return "Will return a Genpipes readset file in a csv format"
+        return "Will return a Genpipes readset file in a tsv format"
 
     def arguments(self):
         self.parser.add_argument('--output', '-o', default="readset_file.tsv")
@@ -114,7 +112,7 @@ class ReadsetFile(AddCMD):
     @property
     def readset_file(self):
         '''
-        organise stuff here when readset is in the list
+        Returns a list of readset lines of GenPipes of the API call for digest_readset_file
         :return:
         '''
         return self.post(f'project/{self.project_name}/digest_readset_file',
@@ -126,10 +124,51 @@ class ReadsetFile(AddCMD):
             tsv_writer.writeheader()
             for readset_line in self.readset_file:
                 tsv_writer.writerow(readset_line)
-            logger.info(f"Readsetfile written to {self.output_file}")
+            logger.info(f"Readset file written to {self.output_file}")
 
     def func(self, parsed_args):
         super().func(parsed_args)
         self.readsets_samples_input = self.data()
         self.output_file = parsed_args.output
         self.json_to_readset_file()
+
+class PairFile(AddCMD):
+    __tool_name__ = 'pair_file'
+    PAIR_HEADER = [
+            "Patient",
+            "Sample_N",
+            "Sample_T"
+            ]
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.readsets_samples_input = None
+        self.output_file = None
+
+    def help(self):
+        return "Will return a Genpipes pair file in a csv format"
+
+    def arguments(self):
+        self.parser.add_argument('--output', '-o', default="pair_file.csv")
+
+    @property
+    def pair_file(self):
+        '''
+        Returns a list of pair lines of GenPipes of the API call for digest_pair_file
+        :return:
+        '''
+        return self.post(f'project/{self.project_name}/digest_pair_file',
+                         data=self.readsets_samples_input)
+
+    def json_to_pair_file(self):
+        with open(self.output_file, "w", encoding="utf-8") as out_pair_file:
+            tsv_writer = csv.DictWriter(out_pair_file, delimiter=',', fieldnames=self.PAIR_HEADER)
+            # tsv_writer.writeheader()
+            for pair_line in self.pair_file:
+                tsv_writer.writerow(pair_line)
+            logger.info(f"Pair file written to {self.output_file}")
+
+    def func(self, parsed_args):
+        super().func(parsed_args)
+        self.readsets_samples_input = self.data()
+        self.output_file = parsed_args.output
+        self.json_to_pair_file()
