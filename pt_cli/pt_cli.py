@@ -50,7 +50,7 @@ def main(args=None, set_logger=True):
 
     post_data = None
     if parsed.data is not None:
-        post_data = parser.data
+        post_data = parsed.data
     elif parsed.data_file is not None:
         post_data = parsed.data_file.read()
         parsed.data_file.close()
