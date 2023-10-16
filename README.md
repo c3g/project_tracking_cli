@@ -51,3 +51,15 @@ pt_cli --url-root http://http://127.0.0.1:5000  route project
 # Should return
 # {"Projetc list": ["MY-PROJECT"]}
 ```
+
+## Having <TAB> completion
+
+```bash
+# Generating completion file for bash
+pt_cli -s bash > _pt_cli
+# Generating completion file for zsh
+pt_cli -s zsh > _pt_cli
+# For oh-my-zsh users
+pt_cli -s zsh > ~/.oh-my-zsh/completions/_pt_cli
+```
+Once done `source` the file created (or reload your environment for omz users) to have completion enabled.

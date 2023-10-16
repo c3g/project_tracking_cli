@@ -22,6 +22,7 @@ dependencies = [
     "requests>=2.28",
     "beautifulsoup4>=4.12",
     "lxml",
+    "shtab",
 ]
 
 [project.scripts]
@@ -31,4 +32,3 @@ pt_cli =  "pt_cli.pt_cli:main"
 [project.urls]
 "Homepage" = "https://github.com/C3G/pt_cli"
 "Bug Tracker" = "https://github.com/pypa/pt_cli/issues"
-

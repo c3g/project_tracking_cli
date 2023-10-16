@@ -1,3 +1,6 @@
+import sys
+import inspect
+
 import getpass
 import json
 import pickle
@@ -9,6 +12,15 @@ import requests
 
 logger = logging.getLogger(__name__)
 
+
+class Error(Exception):
+    """docstring for Error"""
+    def __init__(self, msg):
+        self.args = (f"{type(self).__name__}: {msg}",)
+        sys.exit(self)
+
+class BadRequestError(Error):
+    """docstring for BadRequestError"""
 
 class OAuthNego():
     """
@@ -27,6 +39,7 @@ class OAuthNego():
     def __init__(self, root, session_file):
         self.root = root
         self.cookies = {}
+        self.user = None
         # Initialise session from file
         self.session_file = session_file
         if session_file.is_file():
@@ -50,7 +63,10 @@ class OAuthNego():
         return s
 
     def prompt_pw(self):
-        user = input("Username:")
+        if self.user:
+            user = self.user
+        else:
+            user = input("Username:")
         passwd = getpass.getpass()
         return {'username': user, 'password': passwd, 'credentialId': ''}
 
@@ -64,14 +80,16 @@ class OAuthNego():
         params = {}
         decoded_content = r_get.content.decode()
         for k in self.PARAMS:
-            params[k] = re.search('{}=(.*?)&'.format(k),
-                                  decoded_content).groups()[0]
+            params[k] = re.search('{}=(.*?)&'.format(k), decoded_content).groups()[0]
         post_url = re.search('(https://.*?)\?', decoded_content).groups()[0]
         return self.s.post(post_url, params=params, data=self.prompt_pw())
 
     def maybe_json(self, data):
         try:
-            loads =  json.loads(data)
+            loads = json.loads(data)
+            # logger.info(f"\n\n{type(data)}\n{type(loads)}\n\n")
+            if isinstance(loads, dict) and loads.get("DB_ACTION_ERROR"):
+                raise BadRequestError(loads.get("DB_ACTION_ERROR"))
             self.data_type = 'json'
             return loads
         except json.decoder.JSONDecodeError:
@@ -108,18 +126,13 @@ class Pt_Cli(OAuthNego):
     """
     The cli always connect to a specific project, convenience method can be implemented here.
     """
-    def __init__(self, project_name, *args, **kwargs):
+    def __init__(self, project_id, user, *args, **kwargs):
         super(Pt_Cli, self).__init__(*args, **kwargs)
-        self.project_name = project_name
+        self.project_id = project_id
+        self.user = user
 
     def projects(self):
         return self.get("project")
 
     def help(self):
         return self.get("help")
-
-
-
-
-
-
