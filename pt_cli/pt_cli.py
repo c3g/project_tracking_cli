@@ -8,6 +8,7 @@ import logging
 import urllib.parse
 
 import bs4
+import shtab
 import yaml
 
 try:
@@ -23,8 +24,7 @@ except ModuleNotFoundError:
 logger = logging.getLogger(__name__)
 
 
-def main(args=None, set_logger=True):
-
+def get_main_parser(args=None):
     if args is None:
         args = sys.argv[1:]
 
@@ -33,17 +33,40 @@ def main(args=None, set_logger=True):
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--url-root', help='Where the server is located, will overwrite '
-                                           'value in the ~/.config/pt_cli/connect.yaml config file.'
-                                           'Should be of the "http(s)://location" form', default=None)
-    parser.add_argument('--project', help='project you are working on', default=None)
+    parser.add_argument('--url-root', help='Where the server is located, will overwrite value in the ~/.config/pt_cli/connect.yaml config file. Should be of the "http(s)://location" form', default=None)
+    parser.add_argument('--project', help='Project you are working on', default=None)
 
     group = parser.add_mutually_exclusive_group()
-    group.add_argument('--data-file', help='file use in a post', type=argparse.FileType('r'), default=None)
-    group.add_argument('--data', help='string to use in a post', default=None)
-    parser.add_argument('--loglevel', help='set log level', choices=logging._levelToName.values(), default='INFO')
-    parser.add_argument('--info', help='get current client config', action='store_true')
+    group.add_argument('--data-file', help='File use in a post', type=argparse.FileType('r'), default=None).complete = shtab.FILE
+    group.add_argument('--data', help='String to use in a post', default=None)
+    parser.add_argument('--loglevel', help='Set log level', choices=list(logging._levelToName.values()), default='INFO')
+    parser.add_argument('--info', help='Get current client config', action='store_true')
+    # parser.add_argument('-v', '--verbose', help='Add more verbosity', action='store_true')
 
+    return parser
+
+def main(args=None, set_logger=True):
+
+    if args is None:
+        args = sys.argv[1:]
+
+    # import argparse
+
+
+    # parser = argparse.ArgumentParser()
+
+    # parser.add_argument('--url-root', help='Where the server is located, will overwrite '
+    #                                        'value in the ~/.config/pt_cli/connect.yaml config file.'
+    #                                        'Should be of the "http(s)://location" form', default=None)
+    # parser.add_argument('--project', help='project you are working on', default=None)
+
+    # group = parser.add_mutually_exclusive_group()
+    # group.add_argument('--data-file', help='file use in a post', type=argparse.FileType('r'), default=None)
+    # group.add_argument('--data', help='string to use in a post', default=None)
+    # parser.add_argument('--loglevel', help='set log level', choices=logging._levelToName.values(), default='INFO')
+    # parser.add_argument('--info', help='get current client config', action='store_true')
+
+    parser = get_main_parser()
     # The cli help is handled later once all option and command are stored
     parsed = parser.parse_known_args(args=[a for a in args if a not in ['-h', '--help']])[0]
 
@@ -61,9 +84,12 @@ def main(args=None, set_logger=True):
 
     # Cli Configuration setup
     # Default
-    config = {"url_root": "https://c3g-portal.sd4h.ca",
-               "session_file": "~/.pt_cli",
-               "project": "moh-q"}
+    config = {
+        "url_root": "https://c3g-portal.sd4h.ca",
+        "session_file": "~/.pt_cli",
+        "project": "moh-q",
+        "user": None
+        }
 
     # Config file overwrite
     config_files = ['~/.config/pt_cli/connect.yaml', './connect.yaml']
@@ -89,21 +115,24 @@ def main(args=None, set_logger=True):
 
     if parsed.info:
         sys.stdout.write('Config:\n')
-        for k, v in config.items():
-            sys.stdout.write(f'{k}: {v}\n')
+        for key, value in config.items():
+            sys.stdout.write(f'{key}: {value}\n')
         sys.exit(0)
 
     session_file = pathlib.Path(config['session_file']).expanduser()
-    connector_session = Pt_Cli(config['project'], url_root.geturl(), session_file=session_file)
+    connector_session = Pt_Cli(config['project'], config['user'], url_root.geturl(), session_file=session_file)
 
 
     subparser = parser.add_subparsers(help='use the api routes directly')
 
     def help(parsed_local):
         return sys.stdout.write(connector_session.help())
-    help_parser = subparser.add_parser('help', help='List all available url/routes in the project tracking api.'
-                                                     'All these routes can be reached with the "url <url>" sub-command'
-                                                     'all other subcommand are convenience wrapper around these routes.')
+
+    help_parser = subparser.add_parser(
+        'help',
+        help='List all available url/routes in the project tracking api. All these routes can be reached with the "url <url>" sub-command all other subcommand are convenience wrapper around these routes.',
+        add_help=False
+        )
     help_parser.set_defaults(func=help)
 
     def route(parsed_local):
@@ -121,14 +150,14 @@ def main(args=None, set_logger=True):
         else:
             return sys.stdout.write(json.dumps(response))
 
-    parser_url = subparser.add_parser('route', help='To use any url described in help')
+    parser_url = subparser.add_parser('route', help='To use any url described in help', add_help=False)
     parser_url.add_argument('url')
     parser_url.set_defaults(func=route)
 
     def projects(parsed_local):
         return sys.stdout.write(json.dumps(connector_session.projects()))
 
-    parser_project = subparser.add_parser('projects', help='list all projects')
+    parser_project = subparser.add_parser('projects', help='List all projects', add_help=False)
     parser_project.set_defaults(func=projects)
 
 
@@ -136,6 +165,8 @@ def main(args=None, set_logger=True):
     ReadsetFile(connection_obj=connector_session, subparser=subparser)
 
     PairFile(connection_obj=connector_session, subparser=subparser)
+
+    shtab.add_argument_to(parser, ["-s", "--print-completion"])
 
 
     subparsed = parser.parse_args(args=args)
@@ -148,8 +179,6 @@ def main(args=None, set_logger=True):
         sys.stdout.flush()
     else:
         parser.print_help()
-
-
 
 
 if __name__ == '__main__':
