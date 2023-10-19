@@ -14,8 +14,14 @@ import yaml
 try:
     from pt_cli.connect import Pt_Cli
     from pt_cli.tools import (
+        Digest,
+        Ingest,
         ReadsetFile,
-        PairFile
+        PairFile,
+        Unanalyzed,
+        RunProcessing,
+        Transfer,
+        GenPipes
         )
 except ModuleNotFoundError:
     from connect import Pt_Cli
@@ -87,7 +93,7 @@ def main(args=None, set_logger=True):
     config = {
         "url_root": "https://c3g-portal.sd4h.ca",
         "session_file": "~/.pt_cli",
-        "project": "moh-q",
+        "project": 1,
         "user": None
         }
 
@@ -160,11 +166,15 @@ def main(args=None, set_logger=True):
     parser_project = subparser.add_parser('projects', help='List all projects', add_help=False)
     parser_project.set_defaults(func=projects)
 
+    digest_subparser = Digest(subparser).subparser
+    ReadsetFile(connection_obj=connector_session, subparser=digest_subparser)
+    PairFile(connection_obj=connector_session, subparser=digest_subparser)
+    Unanalyzed(connection_obj=connector_session, subparser=digest_subparser)
 
-
-    ReadsetFile(connection_obj=connector_session, subparser=subparser)
-
-    PairFile(connection_obj=connector_session, subparser=subparser)
+    ingest_subparser = Ingest(subparser).subparser
+    RunProcessing(connection_obj=connector_session, subparser=ingest_subparser)
+    Transfer(connection_obj=connector_session, subparser=ingest_subparser)
+    GenPipes(connection_obj=connector_session, subparser=ingest_subparser)
 
     shtab.add_argument_to(parser, ["-s", "--print-completion"])
 
