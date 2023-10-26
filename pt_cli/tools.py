@@ -193,9 +193,6 @@ class ReadsetFile(AddCMD):
         super().__init__(*args, **kwargs)
         self.readsets_samples_input = None
         self.output_file = None
-        # self.parser = self.digest_subparser.add_parser(self.__subtool_name__, help=self.subhelp(), add_help=True)
-        # self.arguments()
-        # self.parser.set_defaults(func=self.func)
 
     def help(self):
         return "Will return a Genpipes readset file in a tsv format. /!\\ Either use --input-json OR --sample_<name|id>/--readset_<name|id> + --endpoint arguments"
@@ -286,9 +283,6 @@ class PairFile(AddCMD):
         super().__init__(*args, **kwargs)
         self.readsets_samples_input = None
         self.output_file = None
-        # self.parser = self.digest_subparser.add_parser(self.__subtool_name__, help=self.subhelp(), add_help=True)
-        # self.arguments()
-        # self.parser.set_defaults(func=self.func)
 
     def help(self):
         return "Will return a Genpipes pair file in a csv format. /!\\ Either use the --input-json or the --sample/--readset + --endpoint arguments"

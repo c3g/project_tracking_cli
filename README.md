@@ -20,7 +20,7 @@ To query the api at c3g-portal.dev-sd4h.ca:
 pt_cli --url-root https://c3g-portal.dev-sd4h.ca help
 ```
 
-To acces on of the route listed with the `help` cmd, here `/project`
+To access one of the routes listed with the `help` cmd, here `/project`
 ```bash 
 pt_cli --url-root https://c3g-portal.dev-sd4h.ca route /project
 ```
@@ -41,13 +41,13 @@ Once you have a [project_tracking server running on your local machine](https://
 
 ```bash
 # Printing all routes
-pt_cli --url-root http://http://127.0.0.1:5000 help
+pt_cli --url-root http://127.0.0.1:5000 help
 # Creating a project named my-project
-pt_cli --url-root http://http://127.0.0.1:5000  route /admin/create_project/my-project
+pt_cli --url-root http://127.0.0.1:5000  route /admin/create_project/my-project
 # Should return
 # {"creation": "2023-04-13T13:50:39.781030", "id": 1, "name": "MY-PROJECT", "tablename": "project"}
 # Checking what projects are available
-pt_cli --url-root http://http://127.0.0.1:5000  route project
+pt_cli --url-root http://127.0.0.1:5000  route project
 # Should return
 # {"Projetc list": ["MY-PROJECT"]}
 ```
