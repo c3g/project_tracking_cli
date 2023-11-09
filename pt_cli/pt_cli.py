@@ -56,22 +56,6 @@ def main(args=None, set_logger=True):
     if args is None:
         args = sys.argv[1:]
 
-    # import argparse
-
-
-    # parser = argparse.ArgumentParser()
-
-    # parser.add_argument('--url-root', help='Where the server is located, will overwrite '
-    #                                        'value in the ~/.config/pt_cli/connect.yaml config file.'
-    #                                        'Should be of the "http(s)://location" form', default=None)
-    # parser.add_argument('--project', help='project you are working on', default=None)
-
-    # group = parser.add_mutually_exclusive_group()
-    # group.add_argument('--data-file', help='file use in a post', type=argparse.FileType('r'), default=None)
-    # group.add_argument('--data', help='string to use in a post', default=None)
-    # parser.add_argument('--loglevel', help='set log level', choices=logging._levelToName.values(), default='INFO')
-    # parser.add_argument('--info', help='get current client config', action='store_true')
-
     parser = get_main_parser()
     # The cli help is handled later once all option and command are stored
     parsed = parser.parse_known_args(args=[a for a in args if a not in ['-h', '--help']])[0]

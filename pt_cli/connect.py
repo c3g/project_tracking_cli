@@ -25,18 +25,6 @@ class Error(Exception):
 class BadRequestError(Error):
     """docstring for BadRequestError"""
 
-class Warning(Exception):
-    """docstring for Warning"""
-    def __init__(self, msg):
-        if isinstance(msg, list):
-            self.args = (f"{type(self).__name__}: \n{chr(10).join(msg)}",)
-        else:
-            self.args = (f"{type(self).__name__}: {msg}",)
-        sys.exit(self)
-
-class BadRequestWarning(Warning):
-    """docstring for BadRequestWarning"""
-
 class OAuthNego():
     """
     The base class to create python client that is able to
@@ -100,12 +88,14 @@ class OAuthNego():
         return self.s.post(post_url, params=params, data=self.prompt_pw())
 
     def maybe_json(self, data):
+        logger.error(f"***********************HERE\n\n{data}\n\nHERE***********************")
         try:
             loads = json.loads(data)
-            if isinstance(loads, dict) and loads.get("DB_ACTION_ERROR"):
-                raise BadRequestError(loads.get("DB_ACTION_ERROR"))
-            if isinstance(loads, dict) and loads.get("DB_ACTION_WARNING"):
-                raise BadRequestWarning(loads.get("DB_ACTION_WARNING"))
+            if isinstance(loads, dict):
+                if loads.get("DB_ACTION_ERROR"):
+                    raise BadRequestError(loads.get("DB_ACTION_ERROR"))
+                if loads.get("DB_ACTION_WARNING"):
+                    raise BadRequestError(loads.get("DB_ACTION_WARNING"))
             self.data_type = 'json'
             return loads
         except json.decoder.JSONDecodeError:
