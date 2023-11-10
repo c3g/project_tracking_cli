@@ -100,8 +100,8 @@ class OAuthNego():
             return loads
         except json.decoder.JSONDecodeError:
             if isinstance(data, str):
-                soup = bs4.BeautifulSoup(data)
-                raise BadRequestError(sys.stdout.write(soup.get_text()))
+                soup = bs4.BeautifulSoup(data, features="lxml")
+                raise BadRequestError(soup.get_text())
 
     def get(self, path):
         url = "{}/{}".format(self.root, path)
