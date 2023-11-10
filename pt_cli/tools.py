@@ -204,7 +204,7 @@ class ReadsetFile(AddCMD):
         self.parser.add_argument('--sample_id', help='Sample ID to be selected', nargs='+')
         self.parser.add_argument('--readset_id', help='Readset ID to be selected', nargs='+')
         self.parser.add_argument('--endpoint', help="Endpoint in which data is located")
-        self.parser.add_argument('--input-json', help="Json file with sample/readset and endpoint to be selected")
+        self.parser.add_argument('--input-json', help="Json file with sample/readset and endpoint to be selected", type=argparse.FileType('r'))
 
     @property
     def readset_file(self):
@@ -294,7 +294,7 @@ class PairFile(AddCMD):
         self.parser.add_argument('--sample_id', help='Sample ID to be selected', nargs='+')
         self.parser.add_argument('--readset_id', help='Readset ID to be selected', nargs='+')
         self.parser.add_argument('--endpoint', help="Endpoint in which data is located")
-        self.parser.add_argument('--input-json', help="Json file with sample/readset and endpoint to be selected")
+        self.parser.add_argument('--input-json', help="Json file with sample/readset and endpoint to be selected", type=argparse.FileType('r'))
 
     @property
     def pair_file(self):
@@ -468,7 +468,7 @@ class RunProcessing(AddCMD):
         return "Will push Run Processing data into the database"
 
     def arguments(self):
-        self.parser.add_argument('--input-json', help="Json file containing all information to add data from Run Processing into the database")
+        self.parser.add_argument('--input-json', help="Json file containing all information to add data from Run Processing into the database", type=argparse.FileType('r'))
 
     @property
     def run_processing(self):
@@ -505,7 +505,7 @@ class Transfer(AddCMD):
         return "Will push a Transfer of data (copy, rsync, mv, etc) into the database"
 
     def arguments(self):
-        self.parser.add_argument('--input-json', help="Json file containing all information to add data from a Transfer into the database")
+        self.parser.add_argument('--input-json', help="Json file containing all information to add data from a Transfer into the database", type=argparse.FileType('r'))
 
     @property
     def transfer(self):
@@ -542,7 +542,7 @@ class GenPipes(AddCMD):
         return "Will push a GenPipes analysis into the database"
 
     def arguments(self):
-        self.parser.add_argument('--input-json', help="Json file containing all information to add a GenPipes analysis into the database")
+        self.parser.add_argument('--input-json', help="Json file containing all information to add a GenPipes analysis into the database", type=argparse.FileType('r'))
 
     @property
     def genpipes(self):

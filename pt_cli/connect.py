@@ -9,6 +9,7 @@ import weakref
 import logging
 
 import requests
+import bs4
 
 logger = logging.getLogger(__name__)
 
@@ -88,7 +89,6 @@ class OAuthNego():
         return self.s.post(post_url, params=params, data=self.prompt_pw())
 
     def maybe_json(self, data):
-        logger.error(f"***********************HERE\n\n{data}\n\nHERE***********************")
         try:
             loads = json.loads(data)
             if isinstance(loads, dict):
@@ -99,11 +99,16 @@ class OAuthNego():
             self.data_type = 'json'
             return loads
         except json.decoder.JSONDecodeError:
-            if 'html' in data.lower():
-                self.data_type = 'html'
-            else:
-                self.data_type = 'str'
-            return data
+            print(data)
+            # exit()
+            if isinstance(data, str):
+                soup = bs4.BeautifulSoup(data)
+                raise BadRequestError(sys.stdout.write(soup.get_text()))
+            # if 'html' in data.lower():
+            #     self.data_type = 'html'
+            # else:
+            #     self.data_type = 'str'
+            # return data
 
     def get(self, path):
         url = "{}/{}".format(self.root, path)
