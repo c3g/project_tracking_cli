@@ -99,16 +99,9 @@ class OAuthNego():
             self.data_type = 'json'
             return loads
         except json.decoder.JSONDecodeError:
-            print(data)
-            # exit()
             if isinstance(data, str):
                 soup = bs4.BeautifulSoup(data)
                 raise BadRequestError(sys.stdout.write(soup.get_text()))
-            # if 'html' in data.lower():
-            #     self.data_type = 'html'
-            # else:
-            #     self.data_type = 'str'
-            # return data
 
     def get(self, path):
         url = "{}/{}".format(self.root, path)
