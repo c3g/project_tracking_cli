@@ -102,12 +102,13 @@ class OAuthNego():
             if isinstance(data, str):
                 soup = bs4.BeautifulSoup(data, features="lxml")
                 raise BadRequestError(soup.get_text())
+            return data
 
     def get(self, path):
         url = "{}/{}".format(self.root, path)
         r_get = self.s.get(url)
-        # If the api is protected and the session is does
-        # not have the requires token or cookie
+        # If the api is protected and the session does
+        # not have the required token or cookie
         # we get a redirect
         if self.REDIRECT in r_get.url:
             r_get = self.connect(r_get)
@@ -117,8 +118,8 @@ class OAuthNego():
     def post(self, path, data):
         url = "{}/{}".format(self.root, path)
         r_post = self.s.post(url, data=data)
-        # If the api is protected and the session is does
-        # not have the requires token or cookie
+        # If the api is protected and the session does
+        # not have the required token or cookie
         # we get a redirect
         if self.REDIRECT in r_post.url:
             r_post = self.connect(r_post)
