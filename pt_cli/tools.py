@@ -200,10 +200,13 @@ class ReadsetFile(AddCMD):
 
     def arguments(self):
         self.parser.add_argument('--output', '-o', default="readset_file.tsv", help="Name of readset file returned (Default: readset_file.tsv)")
+        self.parser.add_argument('--patient_name', help='Patient Name to be selected', nargs='+')
         self.parser.add_argument('--sample_name', help='Sample Name to be selected', nargs='+')
         self.parser.add_argument('--readset_name', help='Readset Name to be selected', nargs='+')
+        self.parser.add_argument('--patient_id', help='Patient ID to be selected', nargs='+')
         self.parser.add_argument('--sample_id', help='Sample ID to be selected', nargs='+')
         self.parser.add_argument('--readset_id', help='Readset ID to be selected', nargs='+')
+        self.parser.add_argument('--nucleic_acid_type', help="nucleic_acid_type data type", required=True, choices=["DNA", "RNA"])
         self.parser.add_argument('--endpoint', help="Endpoint in which data is located")
         self.parser.add_argument('--input-json', help="Json file with sample/readset and endpoint to be selected", type=argparse.FileType('r')).complete = shtab.FILE
 
@@ -219,8 +222,18 @@ class ReadsetFile(AddCMD):
         :return: jsonified input args
         '''
         json = {
-            "location_endpoint": parsed_args.endpoint
+            "location_endpoint": parsed_args.endpoint,
+            "nucleic_acid_type": parsed_args.nucleic_acid_type
         }
+
+        if parsed_args.patient_name:
+            json["patient_name"] = list(parsed_args.patient_name)
+        if parsed_args.patient_id:
+            if len(parsed_args.patient_id) == 1:
+                json["patient_id"] = unroll(parsed_args.patient_id[0])
+            else:
+                json["patient_id"] = parsed_args.patient_id
+
         if parsed_args.sample_name:
             json["sample_name"] = list(parsed_args.sample_name)
         if parsed_args.sample_id:
@@ -228,6 +241,7 @@ class ReadsetFile(AddCMD):
                 json["sample_id"] = unroll(parsed_args.sample_id[0])
             else:
                 json["sample_id"] = parsed_args.sample_id
+
         if parsed_args.readset_name:
             json["readset_name"] = list(parsed_args.readset_name)
         if parsed_args.readset_id:
@@ -263,10 +277,10 @@ class ReadsetFile(AddCMD):
                 self.readsets_samples_input = parsed_args.input_json.read()
                 parsed_args.input_json.close()
             # --sample_<name|id>/--readset_<name|id> + --endpoint
-            elif (parsed_args.sample_name or parsed_args.readset_name or parsed_args.sample_id or parsed_args.readset_id) and parsed_args.endpoint:
+            elif (parsed_args.patient_name or parsed_args.sample_name or parsed_args.readset_name or parsed_args.patient_id or parsed_args.sample_id or parsed_args.readset_id) and parsed_args.endpoint:
                 self.readsets_samples_input = json.dumps(self.jsonify_input(parsed_args), ensure_ascii=False, indent=4)
             else:
-                raise BadArgumentError("Either use --input-json OR --sample_<name|id>/--readset_<name|id> + --endpoint arguments.")
+                raise BadArgumentError("Either use --input-json OR --patient_<name|id>/--sample_<name|id>/--readset_<name|id> + --endpoint arguments.")
         self.output_file = parsed_args.output
         self.json_to_readset_file()
 
@@ -290,11 +304,14 @@ class PairFile(AddCMD):
 
     def arguments(self):
         self.parser.add_argument('--output', '-o', default="pair_file.csv", help="Name of pair file returned (Default: pair_file.csv)")
+        self.parser.add_argument('--patient_name', help='Patient Name to be selected', nargs='+')
         self.parser.add_argument('--sample_name', help='Sample Name to be selected', nargs='+')
         self.parser.add_argument('--readset_name', help='Readset Name to be selected', nargs='+')
+        self.parser.add_argument('--patient_id', help='Patient ID to be selected', nargs='+')
         self.parser.add_argument('--sample_id', help='Sample ID to be selected', nargs='+')
         self.parser.add_argument('--readset_id', help='Readset ID to be selected', nargs='+')
-        self.parser.add_argument('--endpoint', help="Endpoint in which data is located")
+        self.parser.add_argument('--nucleic_acid_type', help="nucleic_acid_type data type", required=True, choices=["DNA", "RNA"])
+        self.parser.add_argument('--endpoint', help="Without effect, only here to be able to use the same command as the one used with 'pt_cli digest readset_file'")
         self.parser.add_argument('--input-json', help="Json file with sample/readset and endpoint to be selected", type=argparse.FileType('r')).complete = shtab.FILE
 
     @property
@@ -310,8 +327,18 @@ class PairFile(AddCMD):
         :return: jsonified input args
         '''
         json = {
-            "location_endpoint": parsed_args.endpoint
+            "location_endpoint": parsed_args.endpoint,
+            "nucleic_acid_type": parsed_args.nucleic_acid_type
         }
+
+        if parsed_args.patient_name:
+            json["patient_name"] = list(parsed_args.patient_name)
+        if parsed_args.patient_id:
+            if len(parsed_args.patient_id) == 1:
+                json["patient_id"] = unroll(parsed_args.patient_id[0])
+            else:
+                json["patient_id"] = parsed_args.patient_id
+
         if parsed_args.sample_name:
             json["sample_name"] = list(parsed_args.sample_name)
         if parsed_args.sample_id:
@@ -319,6 +346,7 @@ class PairFile(AddCMD):
                 json["sample_id"] = unroll(parsed_args.sample_id[0])
             else:
                 json["sample_id"] = parsed_args.sample_id
+
         if parsed_args.readset_name:
             json["readset_name"] = list(parsed_args.readset_name)
         if parsed_args.readset_id:
@@ -354,10 +382,10 @@ class PairFile(AddCMD):
                 self.readsets_samples_input = parsed_args.input_json.read()
                 parsed_args.input_json.close()
             # --sample_<name|id>/--readset_<name|id> + --endpoint
-            elif (parsed_args.sample_name or parsed_args.readset_name or parsed_args.sample_id or parsed_args.readset_id) and parsed_args.endpoint:
+            elif (parsed_args.patient_name or parsed_args.sample_name or parsed_args.readset_name or parsed_args.patient_id or parsed_args.sample_id or parsed_args.readset_id) and parsed_args.endpoint:
                 self.readsets_samples_input = json.dumps(self.jsonify_input(parsed_args), ensure_ascii=False, indent=4)
             else:
-                raise BadArgumentError("Either use --input-json OR --sample_<name|id>/--readset_<name|id> + --endpoint arguments.")
+                raise BadArgumentError("Either use --input-json OR --patient_<name|id>/--sample_<name|id>/--readset_<name|id> + --endpoint arguments.")
 
         # Checking if odd amount of sample/readset is given as input and Warn user about potential malformed file
         loaded_json = json.loads(self.readsets_samples_input)
