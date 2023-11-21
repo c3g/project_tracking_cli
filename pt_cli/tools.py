@@ -223,7 +223,7 @@ class ReadsetFile(AddCMD):
         '''
         json = {
             "location_endpoint": parsed_args.endpoint,
-            "nucleic_acid_type": parsed_args.nucleic_acid_type
+            "experiment_nucleic_acid_type": parsed_args.nucleic_acid_type
         }
 
         if parsed_args.patient_name:
@@ -328,7 +328,7 @@ class PairFile(AddCMD):
         '''
         json = {
             "location_endpoint": parsed_args.endpoint,
-            "nucleic_acid_type": parsed_args.nucleic_acid_type
+            "experiment_nucleic_acid_type": parsed_args.nucleic_acid_type
         }
 
         if parsed_args.patient_name:
