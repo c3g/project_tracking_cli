@@ -44,6 +44,7 @@ class OAuthNego():
         self.root = root
         self.cookies = {}
         self.user = None
+        self.password = None
         # Initialise session from file
         self.session_file = session_file
         if session_file.is_file():
@@ -71,8 +72,11 @@ class OAuthNego():
             user = self.user
         else:
             user = input("Username:")
-        passwd = getpass.getpass()
-        return {'username': user, 'password': passwd, 'credentialId': ''}
+        if self.password:
+            password = self.password
+        else:
+            password = getpass.getpass()
+        return {'username': user, 'password': password, 'credentialId': ''}
 
     def connect(self, r_get):
         """
@@ -134,10 +138,11 @@ class Pt_Cli(OAuthNego):
     """
     The cli always connect to a specific project, convenience method can be implemented here.
     """
-    def __init__(self, project_id, user, *args, **kwargs):
+    def __init__(self, project_id, user, password, *args, **kwargs):
         super(Pt_Cli, self).__init__(*args, **kwargs)
         self.project_id = project_id
         self.user = user
+        self.password = password
 
     def projects(self):
         return self.get("project")

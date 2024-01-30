@@ -78,7 +78,8 @@ def main(args=None, set_logger=True):
         "url_root": "https://c3g-portal.sd4h.ca",
         "session_file": "~/.pt_cli",
         "project": "moh-q",
-        "user": None
+        "user": None,
+        "password": None
         }
 
     # Config file overwrite
@@ -110,7 +111,7 @@ def main(args=None, set_logger=True):
         sys.exit(0)
 
     session_file = pathlib.Path(config['session_file']).expanduser()
-    connector_session = Pt_Cli(config['project'], config['user'], url_root.geturl(), session_file=session_file)
+    connector_session = Pt_Cli(config['project'], config['user'], config['password'], url_root.geturl(), session_file=session_file)
 
 
     subparser = parser.add_subparsers(help='use the api routes directly')
