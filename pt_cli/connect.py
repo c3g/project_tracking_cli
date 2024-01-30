@@ -9,6 +9,7 @@ import weakref
 import logging
 
 import requests
+import bs4
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +44,7 @@ class OAuthNego():
         self.root = root
         self.cookies = {}
         self.user = None
+        self.password = None
         # Initialise session from file
         self.session_file = session_file
         if session_file.is_file():
@@ -70,8 +72,11 @@ class OAuthNego():
             user = self.user
         else:
             user = input("Username:")
-        passwd = getpass.getpass()
-        return {'username': user, 'password': passwd, 'credentialId': ''}
+        if self.password:
+            password = self.password
+        else:
+            password = getpass.getpass()
+        return {'username': user, 'password': password, 'credentialId': ''}
 
     def connect(self, r_get):
         """
@@ -88,7 +93,6 @@ class OAuthNego():
         return self.s.post(post_url, params=params, data=self.prompt_pw())
 
     def maybe_json(self, data):
-        logger.error(f"***********************HERE\n\n{data}\n\nHERE***********************")
         try:
             loads = json.loads(data)
             if isinstance(loads, dict):
@@ -99,17 +103,19 @@ class OAuthNego():
             self.data_type = 'json'
             return loads
         except json.decoder.JSONDecodeError:
-            if 'html' in data.lower():
-                self.data_type = 'html'
-            else:
-                self.data_type = 'str'
+            if isinstance(data, str):
+                soup = bs4.BeautifulSoup(data, features="lxml")
+                if soup.get_text().startswith("----------"):
+                    sys.stdout.write(soup.get_text())
+                else:
+                    raise BadRequestError(soup.get_text())
             return data
 
     def get(self, path):
         url = "{}/{}".format(self.root, path)
         r_get = self.s.get(url)
-        # If the api is protected and the session is does
-        # not have the requires token or cookie
+        # If the api is protected and the session does
+        # not have the required token or cookie
         # we get a redirect
         if self.REDIRECT in r_get.url:
             r_get = self.connect(r_get)
@@ -119,8 +125,8 @@ class OAuthNego():
     def post(self, path, data):
         url = "{}/{}".format(self.root, path)
         r_post = self.s.post(url, data=data)
-        # If the api is protected and the session is does
-        # not have the requires token or cookie
+        # If the api is protected and the session does
+        # not have the required token or cookie
         # we get a redirect
         if self.REDIRECT in r_post.url:
             r_post = self.connect(r_post)
@@ -132,10 +138,11 @@ class Pt_Cli(OAuthNego):
     """
     The cli always connect to a specific project, convenience method can be implemented here.
     """
-    def __init__(self, project_id, user, *args, **kwargs):
+    def __init__(self, project_id, user, password, *args, **kwargs):
         super(Pt_Cli, self).__init__(*args, **kwargs)
         self.project_id = project_id
         self.user = user
+        self.password = password
 
     def projects(self):
         return self.get("project")
