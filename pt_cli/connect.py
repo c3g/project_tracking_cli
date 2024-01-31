@@ -132,7 +132,8 @@ class OAuthNego():
         # not have the required token or cookie
         # we get a redirect
         if self.REDIRECT in r_post.url:
-            r_post = self.connect(r_post)
+            self.connect(r_post)
+            r_post = self.s.post(url, data=data)
 
         return self.maybe_json(r_post.text)
 
