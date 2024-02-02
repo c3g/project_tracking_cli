@@ -41,7 +41,7 @@ class OAuthNego():
     PARAMS = ['session_code', 'execution', 'client_id', 'tab_id']
 
     def __init__(self, root, session_file):
-        self.root = root
+        self.root = root.strip('/')
         self.cookies = {}
         self.user = None
         self.password = None
