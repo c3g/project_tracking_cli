@@ -129,16 +129,13 @@ def main(args=None, set_logger=True):
     def route(parsed_local):
         url = parsed_local.url.replace('//', '/').strip('/')
         if post_data:
-            logger.debug('POST to {}'.format(url))
+            logger.debug(f'POST to {url}')
             response = connector_session.post(url, post_data)
         else:
-            logger.debug('Get to {}'.format(url))
+            logger.debug(f'GET from {url}')
             response = connector_session.get(url)
 
-        if isinstance(response, str):
-            soup = bs4.BeautifulSoup(response, features="lxml")
-            return sys.stdout.write(soup.get_text())
-        else:
+        if not isinstance(response, str):
             return sys.stdout.write(json.dumps(response))
 
     parser_url = subparser.add_parser('route', help='To use any url described in help', add_help=False)

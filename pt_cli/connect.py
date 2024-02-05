@@ -41,7 +41,7 @@ class OAuthNego():
     PARAMS = ['session_code', 'execution', 'client_id', 'tab_id']
 
     def __init__(self, root, session_file):
-        self.root = root
+        self.root = root.strip('/')
         self.cookies = {}
         self.user = None
         self.password = None
@@ -81,15 +81,15 @@ class OAuthNego():
     def connect(self, r_get):
         """
         This is pretty specific to keycloak,
-        need to find somthing more specific for when we will
+        need to find something more specific for when we will
         use CAF or cilogon
         :return:
         """
         params = {}
         decoded_content = r_get.content.decode()
         for k in self.PARAMS:
-            params[k] = re.search('{}=(.*?)&'.format(k), decoded_content).groups()[0]
-        post_url = re.search('(https://.*?)\?', decoded_content).groups()[0]
+            params[k] = re.search(f'{k}=(.*?)&', decoded_content).groups()[0]
+        post_url = re.search(r'(https://.*?)\?', decoded_content).groups()[0]
         return self.s.post(post_url, params=params, data=self.prompt_pw())
 
     def maybe_json(self, data):
@@ -107,29 +107,35 @@ class OAuthNego():
                 soup = bs4.BeautifulSoup(data, features="lxml")
                 if soup.get_text().startswith("----------"):
                     sys.stdout.write(soup.get_text())
+                elif soup.get_text().startswith("Welcome"):
+                    sys.stdout.write(soup.get_text())
                 else:
                     raise BadRequestError(soup.get_text())
             return data
 
     def get(self, path):
-        url = "{}/{}".format(self.root, path)
+        url = f"{self.root}/{path}"
         r_get = self.s.get(url)
         # If the api is protected and the session does
         # not have the required token or cookie
         # we get a redirect
         if self.REDIRECT in r_get.url:
-            r_get = self.connect(r_get)
+            self.connect(r_get)
+            r_get = self.s.get(url)
 
         return self.maybe_json(r_get.text)
 
     def post(self, path, data):
-        url = "{}/{}".format(self.root, path)
+        url = f"{self.root}/{path}"
+        print(url)
         r_post = self.s.post(url, data=data)
+        print(r_post)
         # If the api is protected and the session does
         # not have the required token or cookie
         # we get a redirect
         if self.REDIRECT in r_post.url:
-            r_post = self.connect(r_post)
+            self.connect(r_post)
+            r_post = self.s.post(url, data=data)
 
         return self.maybe_json(r_post.text)
 
@@ -139,7 +145,7 @@ class Pt_Cli(OAuthNego):
     The cli always connect to a specific project, convenience method can be implemented here.
     """
     def __init__(self, project_id, user, password, *args, **kwargs):
-        super(Pt_Cli, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.project_id = project_id
         self.user = user
         self.password = password
