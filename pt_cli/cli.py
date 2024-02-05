@@ -21,7 +21,6 @@ from pt_cli.tools import (
         GenPipes
         )
 
-
 logger = logging.getLogger(__name__)
 
 
