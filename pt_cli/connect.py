@@ -127,9 +127,7 @@ class OAuthNego():
 
     def post(self, path, data):
         url = f"{self.root}/{path}"
-        print(url)
         r_post = self.s.post(url, data=data)
-        print(r_post)
         # If the api is protected and the session does
         # not have the required token or cookie
         # we get a redirect
