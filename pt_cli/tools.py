@@ -518,7 +518,9 @@ class RunProcessing(AddCMD):
             raise BadArgumentError
 
         response = self.run_processing
-        if not response.startswith("Welcome"):
+        if isinstance(response, str) and response.startswith("Welcome"):
+            pass
+        else:
             sys.stdout.write(json.dumps(response))
 
 class Transfer(AddCMD):
@@ -557,7 +559,9 @@ class Transfer(AddCMD):
             raise BadArgumentError
 
         response = self.transfer
-        if not response.startswith("Welcome"):
+        if isinstance(response, str) and response.startswith("Welcome"):
+            pass
+        else:
             sys.stdout.write(json.dumps(response))
 
 class GenPipes(AddCMD):
@@ -596,5 +600,7 @@ class GenPipes(AddCMD):
             raise BadArgumentError
 
         response = self.genpipes
-        if not response.startswith("Welcome"):
+        if isinstance(response, str) and response.startswith("Welcome"):
+            pass
+        else:
             sys.stdout.write(json.dumps(response))

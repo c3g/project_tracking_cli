@@ -50,7 +50,7 @@ class OAuthNego():
         if session_file.is_file():
             self.s = self.load_session(session_file)
         else:
-            self.s = requests.session()
+            self.s = requests.sessions.Session()
         # save session at the end
         self._finalizer = \
             weakref.finalize(self, self.save_session, self.session_file, self.s)
@@ -78,19 +78,24 @@ class OAuthNego():
             password = getpass.getpass()
         return {'username': user, 'password': password, 'credentialId': ''}
 
-    def connect(self, r_get):
+    def connect(self, r_get=None):
         """
         This is pretty specific to keycloak,
-        need to find something more specific for when we will
+        need to find something less specific for when we will
         use CAF or cilogon
         :return:
         """
+        # By default, connect on the welcome page
+        if r_get is None:
+            r_get = self.s.get(f"{self.root}/")
+
         params = {}
         decoded_content = r_get.content.decode()
         for k in self.PARAMS:
             params[k] = re.search(f'{k}=(.*?)&', decoded_content).groups()[0]
         post_url = re.search(r'(https://.*?)\?', decoded_content).groups()[0]
         return self.s.post(post_url, params=params, data=self.prompt_pw())
+
 
     def maybe_json(self, data):
         try:
@@ -120,21 +125,19 @@ class OAuthNego():
         # not have the required token or cookie
         # we get a redirect
         if self.REDIRECT in r_get.url:
-            self.connect(r_get)
+            self.connect()
             r_get = self.s.get(url)
 
         return self.maybe_json(r_get.text)
 
     def post(self, path, data):
         url = f"{self.root}/{path}"
-        print(url)
         r_post = self.s.post(url, data=data)
-        print(r_post)
         # If the api is protected and the session does
         # not have the required token or cookie
         # we get a redirect
         if self.REDIRECT in r_post.url:
-            self.connect(r_post)
+            self.connect()
             r_post = self.s.post(url, data=data)
 
         return self.maybe_json(r_post.text)

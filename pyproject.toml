@@ -26,7 +26,7 @@ dependencies = [
 ]
 
 [project.scripts]
-pt_cli =  "pt_cli.pt_cli:main"
+pt-cli =  "pt_cli.cli:main"
 
 
 [project.urls]

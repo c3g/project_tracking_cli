@@ -1,5 +1,4 @@
-#!/usr/bin/env python3.11
-import errno
+#!/usr/bin/env python3
 import json
 import os
 import pathlib
@@ -7,13 +6,11 @@ import sys
 import logging
 import urllib.parse
 
-import bs4
 import shtab
 import yaml
 
-try:
-    from pt_cli.connect import Pt_Cli
-    from pt_cli.tools import (
+from pt_cli.connect import Pt_Cli
+from pt_cli.tools import (
         Digest,
         Ingest,
         ReadsetFile,
@@ -23,9 +20,6 @@ try:
         Transfer,
         GenPipes
         )
-except ModuleNotFoundError:
-    from connect import Pt_Cli
-    from tools import ReadsetFile
 
 logger = logging.getLogger(__name__)
 
