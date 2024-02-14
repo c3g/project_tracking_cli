@@ -26,6 +26,18 @@ class Error(Exception):
 class BadRequestError(Error):
     """docstring for BadRequestError"""
 
+class Warning(Exception):
+    """docstring for Warning"""
+    def __init__(self, msg):
+        if isinstance(msg, list):
+            self.args = (f"{type(self).__name__}: \n{chr(10).join(msg)}",)
+        else:
+            self.args = (f"{type(self).__name__}: {msg}",)
+        # sys.exit(self)
+
+class BadRequestWarning(Warning):
+    """docstring for BadRequestError"""
+
 class OAuthNego():
     """
     The base class to create python client that is able to
@@ -104,7 +116,7 @@ class OAuthNego():
                 if loads.get("DB_ACTION_ERROR"):
                     raise BadRequestError(loads.get("DB_ACTION_ERROR"))
                 if loads.get("DB_ACTION_WARNING"):
-                    raise BadRequestError(loads.get("DB_ACTION_WARNING"))
+                    raise BadRequestWarning(loads.get("DB_ACTION_WARNING"))
             self.data_type = 'json'
             return loads
         except json.decoder.JSONDecodeError:

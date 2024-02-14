@@ -206,7 +206,7 @@ class ReadsetFile(AddCMD):
         self.parser.add_argument('--patient_id', help='Patient ID to be selected', nargs='+')
         self.parser.add_argument('--sample_id', help='Sample ID to be selected', nargs='+')
         self.parser.add_argument('--readset_id', help='Readset ID to be selected', nargs='+')
-        self.parser.add_argument('--nucleic_acid_type', help="nucleic_acid_type data type", required=True, choices=["DNA", "RNA"])
+        self.parser.add_argument('--nucleic_acid_type', help="nucleic_acid_type data type", required=False, choices=["DNA", "RNA"])
         self.parser.add_argument('--endpoint', help="Endpoint in which data is located")
         self.parser.add_argument('--input-json', help="Json file with sample/readset and endpoint to be selected", type=argparse.FileType('r')).complete = shtab.FILE
 
@@ -276,11 +276,11 @@ class ReadsetFile(AddCMD):
             if parsed_args.input_json:
                 self.readsets_samples_input = parsed_args.input_json.read()
                 parsed_args.input_json.close()
-            # --sample_<name|id>/--readset_<name|id> + --endpoint
-            elif (parsed_args.patient_name or parsed_args.sample_name or parsed_args.readset_name or parsed_args.patient_id or parsed_args.sample_id or parsed_args.readset_id) and parsed_args.endpoint:
+            # --sample_<name|id>/--readset_<name|id> + --endpoint + --nucleic_acid_type
+            elif (parsed_args.patient_name or parsed_args.sample_name or parsed_args.readset_name or parsed_args.patient_id or parsed_args.sample_id or parsed_args.readset_id) and parsed_args.endpoint and parsed_args.nucleic_acid_type:
                 self.readsets_samples_input = json.dumps(self.jsonify_input(parsed_args), ensure_ascii=False, indent=4)
             else:
-                raise BadArgumentError("Either use --input-json OR --patient_<name|id>/--sample_<name|id>/--readset_<name|id> + --endpoint arguments.")
+                raise BadArgumentError("Either use --input-json OR --patient_<name|id>/--sample_<name|id>/--readset_<name|id> + --endpoint + --nucleic_acid_type arguments.")
         self.output_file = parsed_args.output
         self.json_to_readset_file()
 
@@ -310,7 +310,7 @@ class PairFile(AddCMD):
         self.parser.add_argument('--patient_id', help='Patient ID to be selected', nargs='+')
         self.parser.add_argument('--sample_id', help='Sample ID to be selected', nargs='+')
         self.parser.add_argument('--readset_id', help='Readset ID to be selected', nargs='+')
-        self.parser.add_argument('--nucleic_acid_type', help="nucleic_acid_type data type", required=True, choices=["DNA", "RNA"])
+        self.parser.add_argument('--nucleic_acid_type', help="nucleic_acid_type data type", required=False, choices=["DNA", "RNA"])
         self.parser.add_argument('--endpoint', help="Without effect, only here to be able to use the same command as the one used with 'pt_cli digest readset_file'")
         self.parser.add_argument('--input-json', help="Json file with sample/readset and endpoint to be selected", type=argparse.FileType('r')).complete = shtab.FILE
 
@@ -381,11 +381,11 @@ class PairFile(AddCMD):
             if parsed_args.input_json:
                 self.readsets_samples_input = parsed_args.input_json.read()
                 parsed_args.input_json.close()
-            # --sample_<name|id>/--readset_<name|id> + --endpoint
-            elif (parsed_args.patient_name or parsed_args.sample_name or parsed_args.readset_name or parsed_args.patient_id or parsed_args.sample_id or parsed_args.readset_id) and parsed_args.endpoint:
+            # --sample_<name|id>/--readset_<name|id> + --endpoint + --nucleic_acid_type
+            elif (parsed_args.patient_name or parsed_args.sample_name or parsed_args.readset_name or parsed_args.patient_id or parsed_args.sample_id or parsed_args.readset_id) and parsed_args.endpoint and parsed_args.nucleic_acid_type:
                 self.readsets_samples_input = json.dumps(self.jsonify_input(parsed_args), ensure_ascii=False, indent=4)
             else:
-                raise BadArgumentError("Either use --input-json OR --patient_<name|id>/--sample_<name|id>/--readset_<name|id> + --endpoint arguments.")
+                raise BadArgumentError("Either use --input-json OR --patient_<name|id>/--sample_<name|id>/--readset_<name|id> + --endpoint + --nucleic_acid_type arguments.")
 
         # Checking if odd amount of sample/readset is given as input and Warn user about potential malformed file
         loaded_json = json.loads(self.readsets_samples_input)
@@ -421,7 +421,7 @@ class Unanalyzed(AddCMD):
         self.parser.add_argument('--readset_id', help='Readset ID will be selected', action='store_true', default=False)
         self.parser.add_argument('--run_name', help="Run Name in which Samples/Readsets are", required=False, default=None)
         self.parser.add_argument('--run_id', help="Run ID in which Samples/Readsets are", required=False, default=None)
-        self.parser.add_argument('--experiment_sequencing_technology', help="Experiment Sequencing_Technology in which Samples/Readsets are", required=False, default=None)
+        self.parser.add_argument('--experiment_nucleic_acid_type', help="Experiment nucleic_acid_type characterizing the Samples/Readsets (RNA or DNA)", required=True)
         self.parser.add_argument('--endpoint', help="Endpoint in which data is located", required=True)
         self.parser.add_argument('--output', '-o', help="Name of output file (Default: terminal), formatted as Json file with sample/readset and endpoint")
         # self.parser.add_argument('--input-json', help="Json file with all parameters")
@@ -445,7 +445,7 @@ class Unanalyzed(AddCMD):
             "readset_id": parsed_args.readset_id,
             "run_name": parsed_args.run_name,
             "run_id": parsed_args.run_id,
-            "experiment_sequencing_technology": parsed_args.experiment_sequencing_technology,
+            "experiment_nucleic_acid_type": parsed_args.experiment_nucleic_acid_type,
             "location_endpoint": parsed_args.endpoint,
         }
 
@@ -502,7 +502,7 @@ class RunProcessing(AddCMD):
     @property
     def run_processing(self):
         '''
-        :return: list of readset lines of GenPipes of the API call for digest_readset_file
+        :return: list of readset lines of GenPipes of the API call for ingest_run_processing
         '''
         return self.post(f'project/{self.project_id}/ingest_run_processing', data=self.run_processing_input)
 
@@ -543,7 +543,7 @@ class Transfer(AddCMD):
     @property
     def transfer(self):
         '''
-        :return: list of readset lines of GenPipes of the API call for digest_readset_file
+        :return: list of readset lines of GenPipes of the API call for ingest_transfer
         '''
         return self.post(f'project/{self.project_id}/ingest_transfer', data=self.transfer_input)
 
@@ -584,7 +584,7 @@ class GenPipes(AddCMD):
     @property
     def genpipes(self):
         '''
-        :return: list of readset lines of GenPipes of the API call for digest_readset_file
+        :return: list of readset lines of GenPipes of the API call for ingest_genpipes
         '''
         return self.post(f'project/{self.project_id}/ingest_genpipes', data=self.genpipes_input)
 
