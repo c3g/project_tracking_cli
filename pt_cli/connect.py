@@ -26,6 +26,18 @@ class Error(Exception):
 class BadRequestError(Error):
     """docstring for BadRequestError"""
 
+class Warning(Exception):
+    """docstring for Warning"""
+    def __init__(self, msg):
+        if isinstance(msg, list):
+            self.args = (f"{type(self).__name__}: \n{chr(10).join(msg)}",)
+        else:
+            self.args = (f"{type(self).__name__}: {msg}",)
+        # sys.exit(self)
+
+class BadRequestWarning(Warning):
+    """docstring for BadRequestError"""
+
 class OAuthNego():
     """
     The base class to create python client that is able to
@@ -47,18 +59,17 @@ class OAuthNego():
         self.password = None
         # Initialise session from file
         self.session_file = session_file
-        if session_file.is_file():
+        # if session_file.is_file():
+        try:
             self.s = self.load_session(session_file)
-        else:
+        except (EOFError, FileNotFoundError) as e:
             self.s = requests.sessions.Session()
-        # save session at the end
-        self._finalizer = \
-            weakref.finalize(self, self.save_session, self.session_file, self.s)
+
         data_type = None
 
     @classmethod
     def save_session(cls, file, session):
-        with open(file, 'wb') as fp:
+        with open(file, 'wb', buffering=0) as fp:
             pickle.dump(session, fp)
 
     @classmethod
@@ -94,8 +105,9 @@ class OAuthNego():
         for k in self.PARAMS:
             params[k] = re.search(f'{k}=(.*?)&', decoded_content).groups()[0]
         post_url = re.search(r'(https://.*?)\?', decoded_content).groups()[0]
-        return self.s.post(post_url, params=params, data=self.prompt_pw())
-
+        connect = self.s.post(post_url, params=params, data=self.prompt_pw())
+        self.save_session(self.session_file, self.s)
+        return connect
 
     def maybe_json(self, data):
         try:
@@ -104,7 +116,7 @@ class OAuthNego():
                 if loads.get("DB_ACTION_ERROR"):
                     raise BadRequestError(loads.get("DB_ACTION_ERROR"))
                 if loads.get("DB_ACTION_WARNING"):
-                    raise BadRequestError(loads.get("DB_ACTION_WARNING"))
+                    raise BadRequestWarning(loads.get("DB_ACTION_WARNING"))
             self.data_type = 'json'
             return loads
         except json.decoder.JSONDecodeError:
