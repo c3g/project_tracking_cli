@@ -64,7 +64,6 @@ class OAuthNego():
             self.s = self.load_session(session_file)
         except (EOFError, FileNotFoundError) as e:
             self.s = requests.sessions.Session()
-        self.save_session(session_file, self.s)
 
         data_type = None
 
@@ -106,8 +105,9 @@ class OAuthNego():
         for k in self.PARAMS:
             params[k] = re.search(f'{k}=(.*?)&', decoded_content).groups()[0]
         post_url = re.search(r'(https://.*?)\?', decoded_content).groups()[0]
-        return self.s.post(post_url, params=params, data=self.prompt_pw())
-
+        connect = self.s.post(post_url, params=params, data=self.prompt_pw())
+        self.save_session(self.session_file, self.s)
+        return connect
 
     def maybe_json(self, data):
         try:
