@@ -59,18 +59,18 @@ class OAuthNego():
         self.password = None
         # Initialise session from file
         self.session_file = session_file
-        if session_file.is_file():
+        # if session_file.is_file():
+        try:
             self.s = self.load_session(session_file)
-        else:
+        except (EOFError, FileNotFoundError) as e:
             self.s = requests.sessions.Session()
-        # save session at the end
-        self._finalizer = \
-            weakref.finalize(self, self.save_session, self.session_file, self.s)
+        self.save_session(session_file, self.s)
+
         data_type = None
 
     @classmethod
     def save_session(cls, file, session):
-        with open(file, 'wb') as fp:
+        with open(file, 'wb', buffering=0) as fp:
             pickle.dump(session, fp)
 
     @classmethod
