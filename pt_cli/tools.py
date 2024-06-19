@@ -199,10 +199,10 @@ class ReadsetFile(AddCMD):
 
     def arguments(self):
         self.parser.add_argument('--output', '-o', default="readset_file.tsv", help="Name of readset file returned (Default: readset_file.tsv)")
-        self.parser.add_argument('--organism_name', help='Organism Name to be selected', nargs='+')
+        self.parser.add_argument('--specimen_name', help='Specimen Name to be selected', nargs='+')
         self.parser.add_argument('--sample_name', help='Sample Name to be selected', nargs='+')
         self.parser.add_argument('--readset_name', help='Readset Name to be selected', nargs='+')
-        self.parser.add_argument('--organism_id', help='Organism ID to be selected', nargs='+')
+        self.parser.add_argument('--specimen_id', help='Specimen ID to be selected', nargs='+')
         self.parser.add_argument('--sample_id', help='Sample ID to be selected', nargs='+')
         self.parser.add_argument('--readset_id', help='Readset ID to be selected', nargs='+')
         self.parser.add_argument('--nucleic_acid_type', help="nucleic_acid_type data type", required=False, choices=["DNA", "RNA"])
@@ -225,13 +225,13 @@ class ReadsetFile(AddCMD):
             "experiment_nucleic_acid_type": parsed_args.nucleic_acid_type
         }
 
-        if parsed_args.organism_name:
-            json["organism_name"] = list(parsed_args.organism_name)
-        if parsed_args.organism_id:
-            if len(parsed_args.organism_id) == 1:
-                json["organism_id"] = unroll(parsed_args.organism_id[0])
+        if parsed_args.specimen_name:
+            json["specimen_name"] = list(parsed_args.specimen_name)
+        if parsed_args.specimen_id:
+            if len(parsed_args.specimen_id) == 1:
+                json["specimen_id"] = unroll(parsed_args.specimen_id[0])
             else:
-                json["organism_id"] = parsed_args.organism_id
+                json["specimen_id"] = parsed_args.specimen_id
 
         if parsed_args.sample_name:
             json["sample_name"] = list(parsed_args.sample_name)
@@ -276,10 +276,10 @@ class ReadsetFile(AddCMD):
                 self.readsets_samples_input = parsed_args.input_json.read()
                 parsed_args.input_json.close()
             # --sample_<name|id>/--readset_<name|id> + --endpoint + --nucleic_acid_type
-            elif (parsed_args.organism_name or parsed_args.sample_name or parsed_args.readset_name or parsed_args.organism_id or parsed_args.sample_id or parsed_args.readset_id) and parsed_args.endpoint and parsed_args.nucleic_acid_type:
+            elif (parsed_args.specimen_name or parsed_args.sample_name or parsed_args.readset_name or parsed_args.specimen_id or parsed_args.sample_id or parsed_args.readset_id) and parsed_args.endpoint and parsed_args.nucleic_acid_type:
                 self.readsets_samples_input = json.dumps(self.jsonify_input(parsed_args), ensure_ascii=False, indent=4)
             else:
-                raise BadArgumentError("Either use --input-json OR --organism_<name|id>/--sample_<name|id>/--readset_<name|id> + --endpoint + --nucleic_acid_type arguments.")
+                raise BadArgumentError("Either use --input-json OR --specimen_<name|id>/--sample_<name|id>/--readset_<name|id> + --endpoint + --nucleic_acid_type arguments.")
         self.output_file = parsed_args.output
         self.json_to_readset_file()
 
@@ -289,7 +289,7 @@ class PairFile(AddCMD):
     """
     __tool_name__ = 'pair_file'
     PAIR_HEADER = [
-            "Organism",
+            "Specimen",
             "Sample_N",
             "Sample_T"
             ]
@@ -303,10 +303,10 @@ class PairFile(AddCMD):
 
     def arguments(self):
         self.parser.add_argument('--output', '-o', default="pair_file.csv", help="Name of pair file returned (Default: pair_file.csv)")
-        self.parser.add_argument('--organism_name', help='Organism Name to be selected', nargs='+')
+        self.parser.add_argument('--specimen_name', help='Specimen Name to be selected', nargs='+')
         self.parser.add_argument('--sample_name', help='Sample Name to be selected', nargs='+')
         self.parser.add_argument('--readset_name', help='Readset Name to be selected', nargs='+')
-        self.parser.add_argument('--organism_id', help='Organism ID to be selected', nargs='+')
+        self.parser.add_argument('--specimen_id', help='Specimen ID to be selected', nargs='+')
         self.parser.add_argument('--sample_id', help='Sample ID to be selected', nargs='+')
         self.parser.add_argument('--readset_id', help='Readset ID to be selected', nargs='+')
         self.parser.add_argument('--nucleic_acid_type', help="nucleic_acid_type data type", required=False, choices=["DNA", "RNA"])
@@ -330,13 +330,13 @@ class PairFile(AddCMD):
             "experiment_nucleic_acid_type": parsed_args.nucleic_acid_type
         }
 
-        if parsed_args.organism_name:
-            json["organism_name"] = list(parsed_args.organism_name)
-        if parsed_args.organism_id:
-            if len(parsed_args.organism_id) == 1:
-                json["organism_id"] = unroll(parsed_args.organism_id[0])
+        if parsed_args.specimen_name:
+            json["specimen_name"] = list(parsed_args.specimen_name)
+        if parsed_args.specimen_id:
+            if len(parsed_args.specimen_id) == 1:
+                json["specimen_id"] = unroll(parsed_args.specimen_id[0])
             else:
-                json["organism_id"] = parsed_args.organism_id
+                json["specimen_id"] = parsed_args.specimen_id
 
         if parsed_args.sample_name:
             json["sample_name"] = list(parsed_args.sample_name)
@@ -381,10 +381,10 @@ class PairFile(AddCMD):
                 self.readsets_samples_input = parsed_args.input_json.read()
                 parsed_args.input_json.close()
             # --sample_<name|id>/--readset_<name|id> + --endpoint + --nucleic_acid_type
-            elif (parsed_args.organism_name or parsed_args.sample_name or parsed_args.readset_name or parsed_args.organism_id or parsed_args.sample_id or parsed_args.readset_id) and parsed_args.endpoint and parsed_args.nucleic_acid_type:
+            elif (parsed_args.specimen_name or parsed_args.sample_name or parsed_args.readset_name or parsed_args.specimen_id or parsed_args.sample_id or parsed_args.readset_id) and parsed_args.endpoint and parsed_args.nucleic_acid_type:
                 self.readsets_samples_input = json.dumps(self.jsonify_input(parsed_args), ensure_ascii=False, indent=4)
             else:
-                raise BadArgumentError("Either use --input-json OR --organism_<name|id>/--sample_<name|id>/--readset_<name|id> + --endpoint + --nucleic_acid_type arguments.")
+                raise BadArgumentError("Either use --input-json OR --specimen_<name|id>/--sample_<name|id>/--readset_<name|id> + --endpoint + --nucleic_acid_type arguments.")
 
         # Checking if odd amount of sample/readset is given as input and Warn user about potential malformed file
         loaded_json = json.loads(self.readsets_samples_input)
@@ -495,10 +495,10 @@ class Delivery(AddCMD):
         return "Will return delivery Samples name/ID or Readsets name/ID"
 
     def arguments(self):
-        self.parser.add_argument('--organism_name', help='Organism Name to be selected', nargs='+')
+        self.parser.add_argument('--specimen_name', help='Specimen Name to be selected', nargs='+')
         self.parser.add_argument('--sample_name', help='Sample Name to be selected', nargs='+')
         self.parser.add_argument('--readset_name', help='Readset Name to be selected', nargs='+')
-        self.parser.add_argument('--organism_id', help='Organism ID to be selected', nargs='+')
+        self.parser.add_argument('--specimen_id', help='Specimen ID to be selected', nargs='+')
         self.parser.add_argument('--sample_id', help='Sample ID to be selected', nargs='+')
         self.parser.add_argument('--readset_id', help='Readset ID to be selected', nargs='+')
         self.parser.add_argument('--experiment_nucleic_acid_type', help="Experiment nucleic_acid_type characterizing the Samples/Readsets (RNA or DNA)", required=False)
@@ -523,13 +523,13 @@ class Delivery(AddCMD):
             "experiment_nucleic_acid_type": parsed_args.experiment_nucleic_acid_type
         }
 
-        if parsed_args.organism_name:
-            json["organism_name"] = list(parsed_args.organism_name)
-        if parsed_args.organism_id:
-            if len(parsed_args.organism_id) == 1:
-                json["organism_id"] = unroll(parsed_args.organism_id[0])
+        if parsed_args.specimen_name:
+            json["specimen_name"] = list(parsed_args.specimen_name)
+        if parsed_args.specimen_id:
+            if len(parsed_args.specimen_id) == 1:
+                json["specimen_id"] = unroll(parsed_args.specimen_id[0])
             else:
-                json["organism_id"] = parsed_args.organism_id
+                json["specimen_id"] = parsed_args.specimen_id
 
         if parsed_args.sample_name:
             json["sample_name"] = list(parsed_args.sample_name)
@@ -572,10 +572,10 @@ class Delivery(AddCMD):
         self.parsed_input = self.data()
         # When --data-file is empty
         if not self.parsed_input:
-            if parsed_args.organism_name or parsed_args.sample_name or parsed_args.readset_name or parsed_args.organism_id or parsed_args.sample_id or parsed_args.readset_id:
+            if parsed_args.specimen_name or parsed_args.sample_name or parsed_args.readset_name or parsed_args.specimen_id or parsed_args.sample_id or parsed_args.readset_id:
                 self.parsed_input = json.dumps(self.jsonify_input(parsed_args), ensure_ascii=False, indent=4)
             else:
-                raise BadArgumentError("Use at least one of the following --organism_<name|id>/--sample_<name|id>/--readset_<name|id> argument.")
+                raise BadArgumentError("Use at least one of the following --specimen_<name|id>/--sample_<name|id>/--readset_<name|id> argument.")
 
         self.output_file = parsed_args.output
         self.json_to_delivery()
