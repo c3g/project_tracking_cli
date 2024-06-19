@@ -33,7 +33,6 @@ class Warning(Exception):
             self.args = (f"{type(self).__name__}: \n{chr(10).join(msg)}",)
         else:
             self.args = (f"{type(self).__name__}: {msg}",)
-        # sys.exit(self)
 
 class BadRequestWarning(Warning):
     """docstring for BadRequestError"""
@@ -57,6 +56,7 @@ class OAuthNego():
         self.cookies = {}
         self.user = None
         self.password = None
+        self.quiet = False
         # Initialise session from file
         self.session_file = session_file
         # if session_file.is_file():
@@ -116,7 +116,12 @@ class OAuthNego():
                 if loads.get("DB_ACTION_ERROR"):
                     raise BadRequestError(loads.get("DB_ACTION_ERROR"))
                 if loads.get("DB_ACTION_WARNING"):
-                    raise BadRequestWarning(loads.get("DB_ACTION_WARNING"))
+                    if self.quiet:
+                        logger.warning("WARNINGS written to warning.log")
+                        with open('warning.log', 'w') as f:
+                            f.write(f"\n{chr(10).join(loads.get('DB_ACTION_WARNING'))}")
+                    else:
+                        logger.warning(f"\n{chr(10).join(loads.get('DB_ACTION_WARNING'))}")
             self.data_type = 'json'
             return loads
         except json.decoder.JSONDecodeError:
@@ -159,11 +164,12 @@ class Pt_Cli(OAuthNego):
     """
     The cli always connect to a specific project, convenience method can be implemented here.
     """
-    def __init__(self, project_id, user, password, *args, **kwargs):
+    def __init__(self, project_id, user, password, quiet, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.project_id = project_id
         self.user = user
         self.password = password
+        self.quiet = quiet
 
     def projects(self):
         return self.get("project")
