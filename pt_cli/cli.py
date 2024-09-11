@@ -16,9 +16,14 @@ from pt_cli.tools import (
         ReadsetFile,
         PairFile,
         Unanalyzed,
+        Delivery,
         RunProcessing,
         Transfer,
-        GenPipes
+        GenPipes,
+        Edit,
+        Delete,
+        Deprecate,
+        Curate
         )
 
 logger = logging.getLogger(__name__)
@@ -41,6 +46,7 @@ def get_main_parser(args=None):
     group.add_argument('--data', help='String to use in a post', default=None)
     parser.add_argument('--loglevel', help='Set log level', choices=list(logging._levelToName.values()), default='INFO')
     parser.add_argument('--info', help='Get current client config', action='store_true')
+    parser.add_argument('-q', '--quiet', help='Writes Warnings to a file instead of stdout', action='store_true')
     # parser.add_argument('-v', '--verbose', help='Add more verbosity', action='store_true')
 
     return parser
@@ -105,7 +111,7 @@ def main(args=None, set_logger=True):
         sys.exit(0)
 
     session_file = pathlib.Path(config['session_file']).expanduser()
-    connector_session = Pt_Cli(config['project'], config['user'], config['password'], url_root.geturl(), session_file=session_file)
+    connector_session = Pt_Cli(config['project'], config['user'], config['password'], parsed.quiet, url_root.geturl(), session_file=session_file)
 
 
     subparser = parser.add_subparsers(help='use the api routes directly')
@@ -146,11 +152,17 @@ def main(args=None, set_logger=True):
     ReadsetFile(connection_obj=connector_session, subparser=digest_subparser)
     PairFile(connection_obj=connector_session, subparser=digest_subparser)
     Unanalyzed(connection_obj=connector_session, subparser=digest_subparser)
+    Delivery(connection_obj=connector_session, subparser=digest_subparser)
 
     ingest_subparser = Ingest(subparser).subparser
     RunProcessing(connection_obj=connector_session, subparser=ingest_subparser)
     Transfer(connection_obj=connector_session, subparser=ingest_subparser)
     GenPipes(connection_obj=connector_session, subparser=ingest_subparser)
+
+    Edit(connection_obj=connector_session, subparser=subparser)
+    Delete(connection_obj=connector_session, subparser=subparser)
+    Deprecate(connection_obj=connector_session, subparser=subparser)
+    Curate(connection_obj=connector_session, subparser=subparser)
 
     shtab.add_argument_to(parser, ["-s", "--print-completion"])
 
