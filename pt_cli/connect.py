@@ -10,6 +10,7 @@ import logging
 
 import requests
 import bs4
+import lxml
 
 logger = logging.getLogger(__name__)
 
