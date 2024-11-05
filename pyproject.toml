@@ -36,9 +36,11 @@ pt-cli =  "pt_cli.cli:main"
 allow-direct-references = true
 
 [tool.pdm.version]
-# source = "file"
-# path = "pt_cli/__version__.py"
-source = "scm"
-version_format = "pt_cli.version:format_version"
-write_to = "pt_cli/__version__.py"
-write_template = "__version__ = '{}'"
+source = "file"
+path = "pt_cli/__version__.py"
+# source = "scm"
+# version_format = "pt_cli.version:format_version"
+# write_to = "pt_cli/__version__.py"
+# write_template = "__version__ = '{}'"
+# tag_filter = "main/*"
+# tag_regex = "^main/.*([0-9].[0-9].[0-9])$"
