@@ -6,12 +6,7 @@ on:
       version:
         description: 'Version name'
         required: true
-        default: 'minor'
-        type: choice
-        options:
-          - major
-          - minor
-          - patch
+        type: string
 
 jobs:
   version:
@@ -38,8 +33,8 @@ jobs:
       - name: Update the version
         id: update_version
         run: |
-          echo ${{ github.event.inputs.version }}" > pt_cli/__version__.py
-          echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          echo "__version__ = '${{ inputs.version }}'" > pt_cli/__version__.py
+          echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
       - name: Update Changelog
         run: |
           npm install -g auto-changelog

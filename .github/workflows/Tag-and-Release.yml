@@ -46,7 +46,7 @@ jobs:
       - name: Create changelog diff
         id: changelog_diff
         run: |
-          sed -n '/#### \[2.0.1\]/,/^#### /p' CHANGELOG.md | sed '$d' > release_notes.md
+          sed -n '/#### \[${{ steps.get_tag.outputs.version }}\]/,/^#### /p' CHANGELOG.md | sed '$d' > release_notes.md
       - name: Create release
         id: create_release
         uses: actions/create-release@v1
