@@ -60,16 +60,3 @@ jobs:
           prerelease: false
       - name: Delete release_notes file
         run: rm release_notes.md
-      - name: Increment version and set to beta
-        id: increment_version
-        run: |
-          IFS='.' read -r -a VERSION_PARTS <<< "${{ steps.get_tag.outputs.version }}"
-          VERSION_PARTS[2]=$((VERSION_PARTS[2] + 1))
-          NEW_VERSION="${VERSION_PARTS[0]}.${VERSION_PARTS[1]}.${VERSION_PARTS[2]}-beta"
-          echo "NEW_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
-      - name: Update version in __version__.py
-        run: |
-          echo "__version__ = '${NEW_VERSION}'" > pt_cli/__version__.py
-          git add pt_cli/__version__.py
-          git commit -m "Update version to ${NEW_VERSION}"
-          git push
