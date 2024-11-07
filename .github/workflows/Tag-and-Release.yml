@@ -3,6 +3,7 @@ name: Tag and Release Workflow
 on:
   pull_request:
     types: [closed]
+    branches: ['main']
 
 jobs:
   release:
@@ -19,7 +20,7 @@ jobs:
       attestations: write
       id-token: write
 
-    if: startsWith(github.event.pull_request.title, 'Release:')
+    if: startsWith(github.event.pull_request.title, 'Release:') && github.event.pull_request.merged == true
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
