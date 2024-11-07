@@ -26,6 +26,8 @@ from pt_cli.tools import (
         Curate
         )
 
+from .__version__ import __version__
+
 logger = logging.getLogger(__name__)
 
 
@@ -47,7 +49,7 @@ def get_main_parser(args=None):
     parser.add_argument('--loglevel', help='Set log level', choices=list(logging._levelToName.values()), default='INFO')
     parser.add_argument('--info', help='Get current client config', action='store_true')
     parser.add_argument('-q', '--quiet', help='Writes Warnings to a file instead of stdout', action='store_true')
-    # parser.add_argument('-v', '--verbose', help='Add more verbosity', action='store_true')
+    parser.add_argument('-v', '--version', help='Show version', action="version", version=f'{__version__}')
 
     return parser
 

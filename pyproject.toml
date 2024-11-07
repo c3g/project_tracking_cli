@@ -1,10 +1,10 @@
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
 
 [project]
 name = "pt_cli"
-version = "0.0.1"
+dynamic = ["version"]
 authors = [
   { name="P-O Quirion", email="po.quirion@mcgill.ca" },
   { name="Paul Streteowich", email="paul.stretenowich@mcgill.ca" },
@@ -28,7 +28,19 @@ dependencies = [
 [project.scripts]
 pt-cli =  "pt_cli.cli:main"
 
-
 [project.urls]
 "Homepage" = "https://github.com/C3G/pt_cli"
 "Bug Tracker" = "https://github.com/pypa/pt_cli/issues"
+
+[tool.pdm]
+allow-direct-references = true
+
+[tool.pdm.version]
+source = "file"
+path = "pt_cli/__version__.py"
+# source = "scm"
+# version_format = "pt_cli.version:format_version"
+# write_to = "pt_cli/__version__.py"
+# write_template = "__version__ = '{}'"
+# tag_filter = "main/*"
+# tag_regex = "^main/.*([0-9].[0-9].[0-9])$"

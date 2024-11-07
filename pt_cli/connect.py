@@ -123,6 +123,7 @@ class OAuthNego():
                             f.write(f"\n{chr(10).join(loads.get('DB_ACTION_WARNING'))}")
                     else:
                         logger.warning(f"\n{chr(10).join(loads.get('DB_ACTION_WARNING'))}")
+                    loads.pop("DB_ACTION_WARNING")
             self.data_type = 'json'
             return loads
         except json.decoder.JSONDecodeError:
