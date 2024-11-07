@@ -258,6 +258,10 @@ class ReadsetFile(AddCMD):
         readset_file = self.readset_file
         if not readset_file:
             raise EmptyGetError
+        readset_file = readset_file["DB_ACTION_OUTPUT"]
+        if not readset_file:
+            sys.stdout.write("Nothing returned.")
+            return
         with open(self.output_file, "w", encoding="utf-8") as out_readset_file:
             tsv_writer = csv.DictWriter(out_readset_file, delimiter='\t', fieldnames=self.READSET_HEADER)
             tsv_writer.writeheader()
@@ -363,6 +367,10 @@ class PairFile(AddCMD):
         pair_file = self.pair_file
         if not pair_file:
             raise EmptyGetError
+        pair_file = pair_file["DB_ACTION_OUTPUT"]
+        if not pair_file:
+            sys.stdout.write("Nothing returned.")
+            return
         with open(self.output_file, "w", encoding="utf-8") as out_pair_file:
             tsv_writer = csv.DictWriter(out_pair_file, delimiter=',', fieldnames=self.PAIR_HEADER)
             # tsv_writer.writeheader()

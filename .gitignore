@@ -1,11 +1,14 @@
+# Virtual env
 venv
+.venv
 
+# Misc
 *.sublime-*
-
 *.pyc
 __pycache__/
-
 .DS_Store
+.pdm*
+dist/
 
 # Tests
 pair_file.csv
