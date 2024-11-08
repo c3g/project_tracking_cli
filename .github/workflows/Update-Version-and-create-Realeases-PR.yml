@@ -48,7 +48,7 @@ jobs:
       - name: Fetch and merge main
         run: |
           git fetch origin main
-          git merge origin/main --strategy-option ours || true
+          git merge origin/main --allow-unrelated-histories --strategy-option ours || true
       - name: Resolve conflicts
         if: failure()
         run: |
