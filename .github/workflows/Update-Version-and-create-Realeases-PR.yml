@@ -24,6 +24,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: dev
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -50,3 +53,5 @@ jobs:
           title: "Release: Candidate Version ${{ steps.update_version.outputs.version }} Pull Request"
           body: "This pull request contains the updated __version__.py file with the new release version"
           base: main
+          assignees: paulstretenowich
+          reviewers: paulstretenowich
