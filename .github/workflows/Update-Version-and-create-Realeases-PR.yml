@@ -41,6 +41,8 @@ jobs:
         run: |
           npm install -g auto-changelog
           auto-changelog -v ${{ steps.update_version.outputs.version }}
+      - name: Setup upterm session
+        uses: lhotari/action-upterm@v1
       - name: Create pull request
         id: create_pr
         uses: peter-evans/create-pull-request@v7
