@@ -41,10 +41,20 @@ jobs:
         run: |
           npm install -g auto-changelog
           auto-changelog -v ${{ steps.update_version.outputs.version }}
-      - name: Handle merge conflicts
+      - name: Commit changes
+        run: |
+          git add pt_cli/__version__.py
+          git commit -m "Update version to ${{ inputs.version }}"
+      - name: Fetch and merge main
         run: |
           git fetch origin main
           git merge origin/main --strategy-option ours || true
+      - name: Resolve conflicts
+        if: failure()
+        run: |
+          git checkout --ours pt_cli/__version__.py
+          git add pt_cli/__version__.py
+          git commit -m "Resolved merge conflict in pt_cli/__version__.py"
       - name: Create pull request
         id: create_pr
         uses: peter-evans/create-pull-request@v7
