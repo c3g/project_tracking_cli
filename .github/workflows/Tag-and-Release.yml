@@ -48,14 +48,14 @@ jobs:
           sed -n '/#### \[${{ steps.get_tag.outputs.version }}\]/,/^#### /p' CHANGELOG.md | sed '$d' > release_notes.md
       - name: Create release
         id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v2.1.0
         with:
           tag_name: ${{ steps.get_tag.outputs.version }}
-          release_name: Release ${{ steps.get_tag.outputs.version }}
+          name: Release ${{ steps.get_tag.outputs.version }}
           body_path: ./release_notes.md
           draft: false
           prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Delete release_notes file
         run: rm release_notes.md
