@@ -22,7 +22,9 @@ from pt_cli.tools import (
         GenPipes,
         Edit,
         Delete,
+        Undelete,
         Deprecate,
+        UnDeprecate,
         Curate
         )
 
@@ -163,7 +165,9 @@ def main(args=None, set_logger=True):
 
     Edit(connection_obj=connector_session, subparser=subparser)
     Delete(connection_obj=connector_session, subparser=subparser)
+    Undelete(connection_obj=connector_session, subparser=subparser)
     Deprecate(connection_obj=connector_session, subparser=subparser)
+    UnDeprecate(connection_obj=connector_session, subparser=subparser)
     Curate(connection_obj=connector_session, subparser=subparser)
 
     shtab.add_argument_to(parser, ["-s", "--print-completion"])
