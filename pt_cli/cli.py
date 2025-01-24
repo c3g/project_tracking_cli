@@ -22,7 +22,7 @@ from pt_cli.tools import (
         GenPipes,
         Edit,
         Delete,
-        Undelete,
+        UnDelete,
         Deprecate,
         UnDeprecate,
         Curate
@@ -165,7 +165,7 @@ def main(args=None, set_logger=True):
 
     Edit(connection_obj=connector_session, subparser=subparser)
     Delete(connection_obj=connector_session, subparser=subparser)
-    Undelete(connection_obj=connector_session, subparser=subparser)
+    UnDelete(connection_obj=connector_session, subparser=subparser)
     Deprecate(connection_obj=connector_session, subparser=subparser)
     UnDeprecate(connection_obj=connector_session, subparser=subparser)
     Curate(connection_obj=connector_session, subparser=subparser)
