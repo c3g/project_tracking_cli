@@ -21,7 +21,7 @@ dependencies = [
     "pyyaml>=6.0",
     "requests>=2.28",
     "beautifulsoup4>=4.12",
-    "lxml",
+    "html5lib",
     "shtab",
 ]
 
