@@ -10,7 +10,6 @@ import logging
 
 import requests
 import bs4
-import lxml
 
 logger = logging.getLogger(__name__)
 
@@ -128,7 +127,7 @@ class OAuthNego():
             return loads
         except json.decoder.JSONDecodeError:
             if isinstance(data, str):
-                soup = bs4.BeautifulSoup(data, features="lxml")
+                soup = bs4.BeautifulSoup(data, features="html5lib")
                 if soup.get_text().startswith("----------"):
                     sys.stdout.write(soup.get_text())
                 elif soup.get_text().startswith("Welcome"):
