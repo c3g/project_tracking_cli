@@ -25,7 +25,9 @@ from pt_cli.tools import (
         UnDelete,
         Deprecate,
         UnDeprecate,
-        Curate
+        Curate,
+        GetID,
+        Location,
         )
 
 from .__version__ import __version__
@@ -169,6 +171,9 @@ def main(args=None, set_logger=True):
     Deprecate(connection_obj=connector_session, subparser=subparser)
     UnDeprecate(connection_obj=connector_session, subparser=subparser)
     Curate(connection_obj=connector_session, subparser=subparser)
+
+    getid_subparser = GetID(subparser).subparser
+    Location(connection_obj=connector_session, subparser=getid_subparser)
 
     shtab.add_argument_to(parser, ["-s", "--print-completion"])
 

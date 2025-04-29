@@ -465,7 +465,7 @@ class Unanalyzed(AddCMD):
         unanalyzed = self.unanalyzed
         if not self.output_file:
             if isinstance(unanalyzed, str):
-                soup = bs4.BeautifulSoup(unanalyzed, features="lxml")
+                soup = bs4.BeautifulSoup(unanalyzed, features="html5lib")
                 return sys.stdout.write(soup.get_text())
             # else case, not explicitely written
             return sys.stdout.write(json.dumps(unanalyzed))
@@ -489,6 +489,20 @@ class Unanalyzed(AddCMD):
         self.output_file = parsed_args.output
         self.json_to_unanalyzed()
 
+class Undelivered(AddCMD):
+    """
+    Undelivered is a sub-command of Digest subparser using base AddCMD class
+    """
+    __tool_name__ = 'undelivered'
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.parsed_input = None
+        self.output_file = None
+
+    def help(self):
+        return "Will return undelivered Samples name/ID or Readsets name/ID"
+
+
 class Delivery(AddCMD):
     """
     Delivery is a sub-command of Digest subparser using base AddCMD class
@@ -509,10 +523,9 @@ class Delivery(AddCMD):
         self.parser.add_argument('--specimen_id', help='Specimen ID to be selected', nargs='+')
         self.parser.add_argument('--sample_id', help='Sample ID to be selected', nargs='+')
         self.parser.add_argument('--readset_id', help='Readset ID to be selected', nargs='+')
-        self.parser.add_argument('--experiment_nucleic_acid_type', help="Experiment nucleic_acid_type characterizing the Samples/Readsets (RNA or DNA)", required=False)
+        self.parser.add_argument('--experiment_nucleic_acid_type', help="Experiment nucleic_acid_type characterizing the Samples/Readsets (RNA or DNA)", required=True)
         self.parser.add_argument('--endpoint', help="Endpoint in which data is located", required=True)
         self.parser.add_argument('--output', '-o', help="Name of output file (Default: terminal), formatted as Json file with sample/readset and endpoint")
-        # self.parser.add_argument('--input-json', help="Json file with all parameters")
 
     @property
     def delivery(self):
@@ -564,14 +577,14 @@ class Delivery(AddCMD):
         delivery = self.delivery
         if not self.output_file:
             if isinstance(delivery, str):
-                soup = bs4.BeautifulSoup(delivery, features="lxml")
+                soup = bs4.BeautifulSoup(delivery, features="html5lib")
                 return sys.stdout.write(soup.get_text())
             # else case, not explicitely written
-            return sys.stdout.write(json.dumps(delivery))
+            return sys.stdout.write(json.dumps(delivery["DB_ACTION_OUTPUT"]))
         if not delivery:
             raise EmptyGetError
         with open(self.output_file, "w", encoding="utf-8") as out_pair_file:
-            json.dump(delivery, out_pair_file, ensure_ascii=False, indent=4)
+            json.dump(delivery["DB_ACTION_OUTPUT"], out_pair_file, ensure_ascii=False, indent=4)
             logger.info(f"Delivery file written to {self.output_file}")
 
     def func(self, parsed_args):
@@ -950,3 +963,73 @@ class Curate(AddCMD):
             pass
         else:
             sys.stdout.write("\n".join(response["DB_ACTION_OUTPUT"]))
+
+class GetID:
+    """
+    GetID is a subparser of the client in which you can query per table entries to get their IDs
+    """
+    __tool_name__ = 'getid'
+
+    def __init__(self, subparser=argparse.ArgumentParser().add_subparsers()):
+        self.subparser = subparser.add_parser(self.__tool_name__, help=self.help(), add_help=True).add_subparsers()
+
+    def help(self):
+        """
+        :return: the tool help string
+        """
+        return f"All {self.__tool_name__} sub commands, those encapsulate all tables from the database to be queried and get the ID. Use 'pt_cli {self.__tool_name__} --help' to see more details."
+
+
+class Location(AddCMD):
+    """
+    Location is a sub-command of GetID subparser using base AddCMD class
+    """
+    __tool_name__ = 'location'
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.parsed_input = None
+        self.output_file = None
+
+    def help(self):
+        return "Will return location ID based on location endpoint and file name"
+
+    def arguments(self):
+        self.parser.add_argument('--endpoint', help='Endpoint in which data is located', required=True)
+        self.parser.add_argument('--file_name', help='File Name linked to the location', required=True)
+
+    @property
+    def get_location(self):
+        '''
+        Returns a list of location IDs of GenPipes of the API call for get_location
+        :return:
+        '''
+        return self.post('project/get_location', data=self.parsed_input)
+
+    def jsonify_input(self, parsed_args):
+        '''
+        :return: jsonified input args
+        '''
+        json = {
+            "location_endpoint": parsed_args.endpoint,
+            "file_name": parsed_args.file_name
+        }
+
+        return json
+
+
+    def func(self, parsed_args):
+        super().func(parsed_args)
+        # Dev case when using --data-file
+        self.parsed_input = self.data()
+
+        # When --data-file is empty
+        if not self.parsed_input:
+            self.parsed_input = json.dumps(self.jsonify_input(parsed_args), ensure_ascii=False, indent=4)
+        if not self.parsed_input:
+            raise BadArgumentError
+
+        get_location = self.get_location
+        if isinstance(get_location, str):
+            soup = bs4.BeautifulSoup(get_location, features="html5lib")
+            return sys.stdout.write(soup.get_text())
+        return sys.stdout.write(''.join(get_location["DB_ACTION_OUTPUT"]))
