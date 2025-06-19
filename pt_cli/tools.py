@@ -5,6 +5,7 @@ import csv
 import json
 import logging
 import sys
+import urllib.parse
 import shtab
 
 import bs4
@@ -191,7 +192,7 @@ class ReadsetFile(AddCMD):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.readsets_samples_input = None
+        self.parsed_input = None
         self.output_file = None
 
     def help(self):
@@ -214,7 +215,9 @@ class ReadsetFile(AddCMD):
         '''
         :return: list of readset lines of GenPipes of the API call for digest_readset_file
         '''
-        return self.post(f'project/{self.project_id}/digest_readset_file', data=self.readsets_samples_input)
+        json_payload = json.dumps(self.parsed_input)
+        encoded_json = urllib.parse.quote(json_payload)
+        return self.post(f'project/{self.project_id}/digest_readset_file?json={encoded_json}')
 
     def jsonify_input(self, parsed_args):
         '''
@@ -272,16 +275,16 @@ class ReadsetFile(AddCMD):
     def func(self, parsed_args):
         super().func(parsed_args)
         # Dev case when using --data-file
-        self.readsets_samples_input = self.data()
+        self.parsed_input = self.data()
         # When --data-file is empty
-        if not self.readsets_samples_input:
+        if not self.parsed_input:
             # --input-json alone
             if parsed_args.input_json:
-                self.readsets_samples_input = parsed_args.input_json.read()
+                self.parsed_input = parsed_args.input_json.read()
                 parsed_args.input_json.close()
             # --sample_<name|id>/--readset_<name|id> + --endpoint + --nucleic_acid_type
             elif (parsed_args.specimen_name or parsed_args.sample_name or parsed_args.readset_name or parsed_args.specimen_id or parsed_args.sample_id or parsed_args.readset_id) and parsed_args.endpoint and parsed_args.nucleic_acid_type:
-                self.readsets_samples_input = json.dumps(self.jsonify_input(parsed_args), ensure_ascii=False, indent=4)
+                self.parsed_input = json.dumps(self.jsonify_input(parsed_args), ensure_ascii=False, indent=4)
             else:
                 raise BadArgumentError("Either use --input-json OR --specimen_<name|id>/--sample_<name|id>/--readset_<name|id> + --endpoint + --nucleic_acid_type arguments.")
         self.output_file = parsed_args.output
@@ -299,7 +302,7 @@ class PairFile(AddCMD):
             ]
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.readsets_samples_input = None
+        self.parsed_input = None
         self.output_file = None
 
     def help(self):
@@ -323,7 +326,9 @@ class PairFile(AddCMD):
         Returns a list of pair lines of GenPipes of the API call for digest_pair_file
         :return:
         '''
-        return self.post(f'project/{self.project_id}/digest_pair_file', data=self.readsets_samples_input)
+        json_payload = json.dumps(self.parsed_input)
+        encoded_json = urllib.parse.quote(json_payload)
+        return self.post(f'project/{self.project_id}/digest_pair_file', data=self.parsed_input)
 
     def jsonify_input(self, parsed_args):
         '''
@@ -381,21 +386,21 @@ class PairFile(AddCMD):
     def func(self, parsed_args):
         super().func(parsed_args)
         # Dev case when using --data-file
-        self.readsets_samples_input = self.data()
+        self.parsed_input = self.data()
         # When --data-file is empty
-        if not self.readsets_samples_input:
+        if not self.parsed_input:
             # --input-json alone
             if parsed_args.input_json:
-                self.readsets_samples_input = parsed_args.input_json.read()
+                self.parsed_input = parsed_args.input_json.read()
                 parsed_args.input_json.close()
             # --sample_<name|id>/--readset_<name|id> + --endpoint + --nucleic_acid_type
             elif (parsed_args.specimen_name or parsed_args.sample_name or parsed_args.readset_name or parsed_args.specimen_id or parsed_args.sample_id or parsed_args.readset_id) and parsed_args.endpoint and parsed_args.nucleic_acid_type:
-                self.readsets_samples_input = json.dumps(self.jsonify_input(parsed_args), ensure_ascii=False, indent=4)
+                self.parsed_input = json.dumps(self.jsonify_input(parsed_args), ensure_ascii=False, indent=4)
             else:
                 raise BadArgumentError("Either use --input-json OR --specimen_<name|id>/--sample_<name|id>/--readset_<name|id> + --endpoint + --nucleic_acid_type arguments.")
 
         # Checking if odd amount of sample/readset is given as input and Warn user about potential malformed file
-        loaded_json = json.loads(self.readsets_samples_input)
+        loaded_json = json.loads(self.parsed_input)
         if loaded_json.get("sample_name") and not (len(loaded_json["sample_name"]) % 2) == 0:
             logger.warning("An odd amount of 'sample_name' has been given, the pair file won't be properly formatted for GenPipes!")
         if loaded_json.get("sample_id") and not (len(loaded_json["sample_id"]) % 2) == 0:
@@ -439,7 +444,9 @@ class Unanalyzed(AddCMD):
         Returns a list of pair lines of GenPipes of the API call for digest_unanalyzed
         :return:
         '''
-        return self.post(f'project/{self.project_id}/digest_unanalyzed', data=self.parsed_input)
+        json_payload = json.dumps(self.parsed_input)
+        encoded_json = urllib.parse.quote(json_payload)
+        return self.post(f'project/{self.project_id}/digest_unanalyzed?json={encoded_json}')
 
     def jsonify_input(self, parsed_args):
         '''
@@ -533,7 +540,9 @@ class Delivery(AddCMD):
         Returns a list of pair lines of GenPipes of the API call for digest_delivery
         :return:
         '''
-        return self.post(f'project/{self.project_id}/digest_delivery', data=self.parsed_input)
+        json_payload = json.dumps(self.parsed_input)
+        encoded_json = urllib.parse.quote(json_payload)
+        return self.get(f'project/{self.project_id}/digest_delivery?json={encoded_json}')
 
     def jsonify_input(self, parsed_args):
         '''
@@ -594,7 +603,7 @@ class Delivery(AddCMD):
         # When --data-file is empty
         if not self.parsed_input:
             if parsed_args.specimen_name or parsed_args.sample_name or parsed_args.readset_name or parsed_args.specimen_id or parsed_args.sample_id or parsed_args.readset_id:
-                self.parsed_input = json.dumps(self.jsonify_input(parsed_args), ensure_ascii=False, indent=4)
+                self.parsed_input = self.jsonify_input(parsed_args)
             else:
                 raise BadArgumentError("Use at least one of the following --specimen_<name|id>/--sample_<name|id>/--readset_<name|id> argument.")
 
@@ -610,7 +619,6 @@ class RunProcessing(AddCMD):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.run_processing_input = None
-        self.output_file = None
 
     def help(self):
         return "Will push Run Processing data into the database"
@@ -632,7 +640,12 @@ class RunProcessing(AddCMD):
         # When --data-file is empty
         if not self.run_processing_input and parsed_args.input_json:
             self.run_processing_input = parsed_args.input_json.read()
+            file_name = parsed_args.input_json.name
             parsed_args.input_json.close()
+            payload = json.loads(self.run_processing_input)
+            payload["_source_file"] = file_name
+            self.run_processing_input = json.dumps(payload)
+
         if not self.run_processing_input:
             raise BadArgumentError
 
@@ -673,7 +686,11 @@ class Transfer(AddCMD):
         # When --data-file is empty
         if not self.transfer_input and parsed_args.input_json:
             self.transfer_input = parsed_args.input_json.read()
+            file_name = parsed_args.input_json.name
             parsed_args.input_json.close()
+            payload = json.loads(self.transfer_input)
+            payload["_source_file"] = file_name
+            self.transfer_input = json.dumps(payload)
         if not self.transfer_input:
             raise BadArgumentError
 
@@ -714,7 +731,11 @@ class GenPipes(AddCMD):
         # When --data-file is empty
         if not self.genpipes_input and parsed_args.input_json:
             self.genpipes_input = parsed_args.input_json.read()
+            file_name = parsed_args.input_json.name
             parsed_args.input_json.close()
+            payload = json.loads(self.genpipes_input)
+            payload["_source_file"] = file_name
+            self.genpipes_input = json.dumps(payload)
         if not self.genpipes_input:
             raise BadArgumentError
 
@@ -739,6 +760,7 @@ class Edit(AddCMD):
 
     def arguments(self):
         self.parser.add_argument('--input-json', help="Json file containing all information to be edited on the database", type=argparse.FileType('r')).complete = shtab.FILE
+        self.parser.add_argument('--dry_run', action='store_true', default=False, help="If set, will only print the entries that will be curated without actually curating them.")
 
     @property
     def edit(self):
@@ -757,6 +779,12 @@ class Edit(AddCMD):
             parsed_args.input_json.close()
         if not self.edit_input:
             raise BadArgumentError
+
+        # Add dry_run flag if set
+        if parsed_args.dry_run:
+            self.edit_input = json.loads(self.edit_input)
+            self.edit_input["dry_run"] = True
+            self.edit_input = json.dumps(self.edit_input, ensure_ascii=False, indent=4)
 
         response = self.edit
         if isinstance(response, str) and response.startswith("Welcome"):
@@ -779,6 +807,10 @@ class Delete(AddCMD):
 
     def arguments(self):
         self.parser.add_argument('--input-json', help="Json file containing all information to be deleted on the database", type=argparse.FileType('r')).complete = shtab.FILE
+        self.parser.add_argument('--dry_run', action='store_true', default=False, help="If set, will only print the entries that will be curated without actually curating them.")
+        self.parser.add_argument('--cascade_down', help="Cascade delete, will delete all children of the entry and orphan", action='store_true', default=False)
+        self.parser.add_argument('--cascade_up', help="Cascade delete, will delete all parents of the entry and orphan", action='store_true', default=False)
+        self.parser.add_argument('--cascade', help="Cascade delete, will delete all parents and children of the entry and orphan", action='store_true', default=False)
 
     @property
     def delete(self):
@@ -797,6 +829,26 @@ class Delete(AddCMD):
             parsed_args.input_json.close()
         if not self.delete_input:
             raise BadArgumentError
+
+        # Add dry_run flag if set
+        if parsed_args.dry_run:
+            self.delete_input = json.loads(self.delete_input)
+            self.delete_input["dry_run"] = True
+            self.delete_input = json.dumps(self.delete_input, ensure_ascii=False, indent=4)
+
+        # Adding cascade options to the input
+        if parsed_args.cascade_down:
+            self.delete_input = json.loads(self.delete_input)
+            self.delete_input["cascade_down"] = True
+            self.delete_input = json.dumps(self.delete_input, ensure_ascii=False, indent=4)
+        elif parsed_args.cascade_up:
+            self.delete_input = json.loads(self.delete_input)
+            self.delete_input["cascade_up"] = True
+            self.delete_input = json.dumps(self.delete_input, ensure_ascii=False, indent=4)
+        elif parsed_args.cascade:
+            self.delete_input = json.loads(self.delete_input)
+            self.delete_input["cascade"] = True
+            self.delete_input = json.dumps(self.delete_input, ensure_ascii=False, indent=4)
 
         response = self.delete
         if isinstance(response, str) and response.startswith("Welcome"):
@@ -819,6 +871,10 @@ class UnDelete(AddCMD):
 
     def arguments(self):
         self.parser.add_argument('--input-json', help="Json file containing all information to be undeleted on the database", type=argparse.FileType('r')).complete = shtab.FILE
+        self.parser.add_argument('--dry_run', action='store_true', default=False, help="If set, will only print the entries that will be curated without actually curating them.")
+        self.parser.add_argument('--cascade_down', help="Cascade undelete, will undelete all children of the entry and orphan", action='store_true', default=False)
+        self.parser.add_argument('--cascade_up', help="Cascade undelete, will undelete all parents of the entry and orphan", action='store_true', default=False)
+        self.parser.add_argument('--cascade', help="Cascade undelete, will undelete all parents and children of the entry and orphan", action='store_true', default=False)
 
     @property
     def undelete(self):
@@ -837,6 +893,26 @@ class UnDelete(AddCMD):
             parsed_args.input_json.close()
         if not self.undelete_input:
             raise BadArgumentError
+
+        # Add dry_run flag if set
+        if parsed_args.dry_run:
+            self.undelete_input = json.loads(self.undelete_input)
+            self.undelete_input["dry_run"] = True
+            self.undelete_input = json.dumps(self.undelete_input, ensure_ascii=False, indent=4)
+
+        # Adding cascade options to the input
+        if parsed_args.cascade_down:
+            self.undelete_input = json.loads(self.undelete_input)
+            self.undelete_input["cascade_down"] = True
+            self.undelete_input = json.dumps(self.undelete_input, ensure_ascii=False, indent=4)
+        elif parsed_args.cascade_up:
+            self.undelete_input = json.loads(self.undelete_input)
+            self.undelete_input["cascade_up"] = True
+            self.undelete_input = json.dumps(self.undelete_input, ensure_ascii=False, indent=4)
+        elif parsed_args.cascade:
+            self.undelete_input = json.loads(self.undelete_input)
+            self.undelete_input["cascade"] = True
+            self.undelete_input = json.dumps(self.undelete_input, ensure_ascii=False, indent=4)
 
         response = self.undelete
         if isinstance(response, str) and response.startswith("Welcome"):
@@ -859,6 +935,10 @@ class Deprecate(AddCMD):
 
     def arguments(self):
         self.parser.add_argument('--input-json', help="Json file containing all information to be deprecated on the database", type=argparse.FileType('r')).complete = shtab.FILE
+        self.parser.add_argument('--dry_run', action='store_true', default=False, help="If set, will only print the entries that will be curated without actually curating them.")
+        self.parser.add_argument('--cascade_down', help="Cascade undelete, will undelete all children of the entry and orphan", action='store_true', default=False)
+        self.parser.add_argument('--cascade_up', help="Cascade undelete, will undelete all parents of the entry and orphan", action='store_true', default=False)
+        self.parser.add_argument('--cascade', help="Cascade undelete, will undelete all parents and children of the entry and orphan", action='store_true', default=False)
 
     @property
     def deprecate(self):
@@ -877,6 +957,26 @@ class Deprecate(AddCMD):
             parsed_args.input_json.close()
         if not self.deprecate_input:
             raise BadArgumentError
+
+        # Add dry_run flag if set
+        if parsed_args.dry_run:
+            self.deprecate_input = json.loads(self.deprecate_input)
+            self.deprecate_input["dry_run"] = True
+            self.deprecate_input = json.dumps(self.deprecate_input, ensure_ascii=False, indent=4)
+
+        # Adding cascade options to the input
+        if parsed_args.cascade_down:
+            self.deprecate_input = json.loads(self.deprecate_input)
+            self.deprecate_input["cascade_down"] = True
+            self.deprecate_input = json.dumps(self.deprecate_input, ensure_ascii=False, indent=4)
+        elif parsed_args.cascade_up:
+            self.deprecate_input = json.loads(self.deprecate_input)
+            self.deprecate_input["cascade_up"] = True
+            self.deprecate_input = json.dumps(self.deprecate_input, ensure_ascii=False, indent=4)
+        elif parsed_args.cascade:
+            self.deprecate_input = json.loads(self.deprecate_input)
+            self.deprecate_input["cascade"] = True
+            self.deprecate_input = json.dumps(self.deprecate_input, ensure_ascii=False, indent=4)
 
         response = self.deprecate
         if isinstance(response, str) and response.startswith("Welcome"):
@@ -899,6 +999,10 @@ class UnDeprecate(AddCMD):
 
     def arguments(self):
         self.parser.add_argument('--input-json', help="Json file containing all information to be undeprecated on the database", type=argparse.FileType('r')).complete = shtab.FILE
+        self.parser.add_argument('--dry_run', action='store_true', default=False, help="If set, will only print the entries that will be curated without actually curating them.")
+        self.parser.add_argument('--cascade_down', help="Cascade undelete, will undelete all children of the entry and orphan", action='store_true', default=False)
+        self.parser.add_argument('--cascade_up', help="Cascade undelete, will undelete all parents of the entry and orphan", action='store_true', default=False)
+        self.parser.add_argument('--cascade', help="Cascade undelete, will undelete all parents and children of the entry and orphan", action='store_true', default=False)
 
     @property
     def undeprecate(self):
@@ -917,6 +1021,26 @@ class UnDeprecate(AddCMD):
             parsed_args.input_json.close()
         if not self.undeprecate_input:
             raise BadArgumentError
+
+        # Add dry_run flag if set
+        if parsed_args.dry_run:
+            self.undeprecate_input = json.loads(self.undeprecate_input)
+            self.undeprecate_input["dry_run"] = True
+            self.undeprecate_input = json.dumps(self.undeprecate_input, ensure_ascii=False, indent=4)
+
+        # Adding cascade options to the input
+        if parsed_args.cascade_down:
+            self.undeprecate_input = json.loads(self.undeprecate_input)
+            self.undeprecate_input["cascade_down"] = True
+            self.undeprecate_input = json.dumps(self.undeprecate_input, ensure_ascii=False, indent=4)
+        elif parsed_args.cascade_up:
+            self.undeprecate_input = json.loads(self.undeprecate_input)
+            self.undeprecate_input["cascade_up"] = True
+            self.undeprecate_input = json.dumps(self.undeprecate_input, ensure_ascii=False, indent=4)
+        elif parsed_args.cascade:
+            self.undeprecate_input = json.loads(self.undeprecate_input)
+            self.undeprecate_input["cascade"] = True
+            self.undeprecate_input = json.dumps(self.undeprecate_input, ensure_ascii=False, indent=4)
 
         response = self.undeprecate
         if isinstance(response, str) and response.startswith("Welcome"):
@@ -939,6 +1063,10 @@ class Curate(AddCMD):
 
     def arguments(self):
         self.parser.add_argument('--input-json', help="Json file containing all information to be curated from the database", type=argparse.FileType('r')).complete = shtab.FILE
+        self.parser.add_argument('--dry_run', action='store_true', default=False, help="If set, will only print the entries that will be curated without actually curating them.")
+        self.parser.add_argument('--cascade_down', help="Cascade undelete, will undelete all children of the entry and orphan", action='store_true', default=False)
+        self.parser.add_argument('--cascade_up', help="Cascade undelete, will undelete all parents of the entry and orphan", action='store_true', default=False)
+        self.parser.add_argument('--cascade', help="Cascade undelete, will undelete all parents and children of the entry and orphan", action='store_true', default=False)
 
     @property
     def curate(self):
@@ -955,81 +1083,33 @@ class Curate(AddCMD):
         if not self.curate_input and parsed_args.input_json:
             self.curate_input = parsed_args.input_json.read()
             parsed_args.input_json.close()
+
+        # Ensure curate_input is not empty
         if not self.curate_input:
             raise BadArgumentError
+
+        # Add dry_run flag if set
+        if parsed_args.dry_run:
+            self.curate_input = json.loads(self.curate_input)
+            self.curate_input["dry_run"] = True
+            self.curate_input = json.dumps(self.curate_input, ensure_ascii=False, indent=4)
+
+        # Adding cascade options to the input
+        if parsed_args.cascade_down:
+            self.curate_input = json.loads(self.curate_input)
+            self.curate_input["cascade_down"] = True
+            self.curate_input = json.dumps(self.curate_input, ensure_ascii=False, indent=4)
+        elif parsed_args.cascade_up:
+            self.curate_input = json.loads(self.curate_input)
+            self.curate_input["cascade_up"] = True
+            self.curate_input = json.dumps(self.curate_input, ensure_ascii=False, indent=4)
+        elif parsed_args.cascade:
+            self.curate_input = json.loads(self.curate_input)
+            self.curate_input["cascade"] = True
+            self.curate_input = json.dumps(self.curate_input, ensure_ascii=False, indent=4)
 
         response = self.curate
         if isinstance(response, str) and response.startswith("Welcome"):
             pass
         else:
             sys.stdout.write("\n".join(response["DB_ACTION_OUTPUT"]))
-
-class GetID:
-    """
-    GetID is a subparser of the client in which you can query per table entries to get their IDs
-    """
-    __tool_name__ = 'getid'
-
-    def __init__(self, subparser=argparse.ArgumentParser().add_subparsers()):
-        self.subparser = subparser.add_parser(self.__tool_name__, help=self.help(), add_help=True).add_subparsers()
-
-    def help(self):
-        """
-        :return: the tool help string
-        """
-        return f"All {self.__tool_name__} sub commands, those encapsulate all tables from the database to be queried and get the ID. Use 'pt_cli {self.__tool_name__} --help' to see more details."
-
-
-class Location(AddCMD):
-    """
-    Location is a sub-command of GetID subparser using base AddCMD class
-    """
-    __tool_name__ = 'location'
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.parsed_input = None
-        self.output_file = None
-
-    def help(self):
-        return "Will return location ID based on location endpoint and file name"
-
-    def arguments(self):
-        self.parser.add_argument('--endpoint', help='Endpoint in which data is located', required=True)
-        self.parser.add_argument('--file_name', help='File Name linked to the location', required=True)
-
-    @property
-    def get_location(self):
-        '''
-        Returns a list of location IDs of GenPipes of the API call for get_location
-        :return:
-        '''
-        return self.post('project/get_location', data=self.parsed_input)
-
-    def jsonify_input(self, parsed_args):
-        '''
-        :return: jsonified input args
-        '''
-        json = {
-            "location_endpoint": parsed_args.endpoint,
-            "file_name": parsed_args.file_name
-        }
-
-        return json
-
-
-    def func(self, parsed_args):
-        super().func(parsed_args)
-        # Dev case when using --data-file
-        self.parsed_input = self.data()
-
-        # When --data-file is empty
-        if not self.parsed_input:
-            self.parsed_input = json.dumps(self.jsonify_input(parsed_args), ensure_ascii=False, indent=4)
-        if not self.parsed_input:
-            raise BadArgumentError
-
-        get_location = self.get_location
-        if isinstance(get_location, str):
-            soup = bs4.BeautifulSoup(get_location, features="html5lib")
-            return sys.stdout.write(soup.get_text())
-        return sys.stdout.write(''.join(get_location["DB_ACTION_OUTPUT"]))
