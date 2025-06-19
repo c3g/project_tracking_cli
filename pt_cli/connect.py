@@ -116,12 +116,15 @@ class OAuthNego():
                 if loads.get("DB_ACTION_ERROR"):
                     raise BadRequestError(loads.get("DB_ACTION_ERROR"))
                 if loads.get("DB_ACTION_WARNING"):
+                    db_action_warning = loads.get("DB_ACTION_WARNING")
+                    if isinstance(db_action_warning, list):
+                        db_action_warning = "\n".join(db_action_warning)
                     if self.quiet:
                         logger.warning("WARNINGS written to warning.log")
                         with open('warning.log', 'w') as f:
-                            f.write(f"\n{chr(10).join(loads.get('DB_ACTION_WARNING'))}")
+                            f.write(f"\n{db_action_warning}")
                     else:
-                        logger.warning(f"\n{chr(10).join(loads.get('DB_ACTION_WARNING'))}")
+                        logger.warning(f"\n{db_action_warning}")
                     loads.pop("DB_ACTION_WARNING")
             self.data_type = 'json'
             return loads
