@@ -25,9 +25,7 @@ from pt_cli.tools import (
         UnDelete,
         Deprecate,
         UnDeprecate,
-        Curate,
-        GetID,
-        Location,
+        Curate
         )
 
 from .__version__ import __version__
@@ -141,7 +139,10 @@ def main(args=None, set_logger=True):
             logger.debug(f'GET from {url}')
             response = connector_session.get(url)
 
-        if not isinstance(response, str):
+        if isinstance(response, list) and response:
+            return sys.stdout.write('\n'.join([json.dumps(item) for item in response]))
+
+        if not isinstance(response, str) and response:
             return sys.stdout.write(json.dumps(response))
 
     parser_url = subparser.add_parser('route', help='To use any url described in help', add_help=False)
@@ -171,9 +172,6 @@ def main(args=None, set_logger=True):
     Deprecate(connection_obj=connector_session, subparser=subparser)
     UnDeprecate(connection_obj=connector_session, subparser=subparser)
     Curate(connection_obj=connector_session, subparser=subparser)
-
-    getid_subparser = GetID(subparser).subparser
-    Location(connection_obj=connector_session, subparser=getid_subparser)
 
     shtab.add_argument_to(parser, ["-s", "--print-completion"])
 
