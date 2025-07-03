@@ -217,7 +217,7 @@ class ReadsetFile(AddCMD):
         '''
         json_payload = json.dumps(self.parsed_input)
         encoded_json = urllib.parse.quote(json_payload)
-        return self.post(f'project/{self.project_id}/digest_readset_file?json={encoded_json}')
+        return self.get(f'project/{self.project_id}/digest_readset_file?json={encoded_json}')
 
     def jsonify_input(self, parsed_args):
         '''
@@ -328,7 +328,7 @@ class PairFile(AddCMD):
         '''
         json_payload = json.dumps(self.parsed_input)
         encoded_json = urllib.parse.quote(json_payload)
-        return self.post(f'project/{self.project_id}/digest_pair_file', data=self.parsed_input)
+        return self.get(f'project/{self.project_id}/digest_pair_file?json={encoded_json}')
 
     def jsonify_input(self, parsed_args):
         '''
@@ -446,7 +446,7 @@ class Unanalyzed(AddCMD):
         '''
         json_payload = json.dumps(self.parsed_input)
         encoded_json = urllib.parse.quote(json_payload)
-        return self.post(f'project/{self.project_id}/digest_unanalyzed?json={encoded_json}')
+        return self.get(f'project/{self.project_id}/digest_unanalyzed?json={encoded_json}')
 
     def jsonify_input(self, parsed_args):
         '''
@@ -495,20 +495,6 @@ class Unanalyzed(AddCMD):
 
         self.output_file = parsed_args.output
         self.json_to_unanalyzed()
-
-class Undelivered(AddCMD):
-    """
-    Undelivered is a sub-command of Digest subparser using base AddCMD class
-    """
-    __tool_name__ = 'undelivered'
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.parsed_input = None
-        self.output_file = None
-
-    def help(self):
-        return "Will return undelivered Samples name/ID or Readsets name/ID"
-
 
 class Delivery(AddCMD):
     """
