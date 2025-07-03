@@ -731,6 +731,8 @@ class GenPipes(AddCMD):
         else:
             sys.stdout.write("\n".join([json.dumps(i) for i in response["DB_ACTION_OUTPUT"]]))
 
+# TODO: Add ingest delivery
+
 class Edit(AddCMD):
     """
     Edit is a sub-command base AddCMD class
