@@ -20,6 +20,7 @@ from pt_cli.tools import (
         RunProcessing,
         Transfer,
         GenPipes,
+        DeliveryIngest,
         Edit,
         Delete,
         UnDelete,
@@ -165,6 +166,7 @@ def main(args=None, set_logger=True):
     RunProcessing(connection_obj=connector_session, subparser=ingest_subparser)
     Transfer(connection_obj=connector_session, subparser=ingest_subparser)
     GenPipes(connection_obj=connector_session, subparser=ingest_subparser)
+    DeliveryIngest(connection_obj=connector_session, subparser=ingest_subparser)
 
     Edit(connection_obj=connector_session, subparser=subparser)
     Delete(connection_obj=connector_session, subparser=subparser)
