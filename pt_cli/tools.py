@@ -731,7 +731,54 @@ class GenPipes(AddCMD):
         else:
             sys.stdout.write("\n".join([json.dumps(i) for i in response["DB_ACTION_OUTPUT"]]))
 
-# TODO: Add ingest delivery
+class DeliveryIngest(AddCMD):
+    """
+    DeliveryIngest is a sub-command of Ingest subparser using base AddCMD class
+    """
+    __tool_name__ = 'delivery'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.delivery_input = None
+
+    def help(self):
+        return "Will push a Delivery of data into the database"
+
+    def arguments(self):
+        self.parser.add_argument('--input-json', help="Json file containing all information to add data from a Delivery into the database", type=argparse.FileType('r')).complete = shtab.FILE
+        self.parser.add_argument('--delete', action='store_true', default=True, help="By default, delivery will delete the files from their original location after transfer. If you want to keep the original files, set this flag to False.")
+
+    @property
+    def delivery(self):
+        '''
+        :return: list of readset lines of GenPipes of the API call for ingest_delivery
+        '''
+        return self.post(f'project/{self.project_id}/ingest_delivery', data=self.delivery_input)
+
+    def func(self, parsed_args):
+        super().func(parsed_args)
+        # Dev case when using --data-file
+        self.delivery_input = self.data()
+        # When --data-file is empty
+        if not self.delivery_input and parsed_args.input_json:
+            self.delivery_input = parsed_args.input_json.read()
+            file_name = parsed_args.input_json.name
+            parsed_args.input_json.close()
+            payload = json.loads(self.delivery_input)
+            payload["_source_file"] = file_name
+            self.delivery_input = json.dumps(payload)
+        if not self.delivery_input:
+            raise BadArgumentError
+
+        self.delivery_input = json.loads(self.delivery_input)
+        self.delivery_input["delete"] = parsed_args.delete
+        self.delivery_input = json.dumps(self.delivery_input, ensure_ascii=False, indent=4)
+
+        response = self.delivery
+        if isinstance(response, str) and response.startswith("Welcome"):
+            pass
+        else:
+            sys.stdout.write("\n".join([json.dumps(i) for i in response["DB_ACTION_OUTPUT"]]))
 
 class Edit(AddCMD):
     """
