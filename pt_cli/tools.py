@@ -39,6 +39,25 @@ class EmptyGetError(Error):
         self.args = (f"{type(self).__name__}: {self.message}",)
         sys.exit(self)
 
+class JSONDecodeError(Error):
+    """Raised when JSON decoding fails."""
+    def __init__(self, context, original_exception):
+        message = f"Failed to decode JSON {context}: {original_exception}\n                 This is most likely not a JSON file or it's malformed."
+        super().__init__(message)
+        self.args = (f"{type(self).__name__}: {self.message}",)
+        sys.exit(self)
+
+
+def safe_json_loads(data, context=""):
+    """
+    Safely load JSON data, raising a custom error with context if decoding fails.
+    """
+    try:
+        return json.loads(data)
+    except json.JSONDecodeError as e:
+        raise JSONDecodeError(context, e) from e
+
+
 def unroll(string):
     """
     string: includes number in the "1,3-7,9" form
@@ -400,7 +419,7 @@ class PairFile(AddCMD):
                 raise BadArgumentError("Either use --input-json OR --specimen_<name|id>/--sample_<name|id>/--readset_<name|id> + --endpoint + --nucleic_acid_type arguments.")
 
         # Checking if odd amount of sample/readset is given as input and Warn user about potential malformed file
-        loaded_json = json.loads(self.parsed_input)
+        loaded_json = safe_json_loads(self.parsed_input)
         if loaded_json.get("sample_name") and not (len(loaded_json["sample_name"]) % 2) == 0:
             logger.warning("An odd amount of 'sample_name' has been given, the pair file won't be properly formatted for GenPipes!")
         if loaded_json.get("sample_id") and not (len(loaded_json["sample_id"]) % 2) == 0:
@@ -628,7 +647,7 @@ class RunProcessing(AddCMD):
             self.run_processing_input = parsed_args.input_json.read()
             file_name = parsed_args.input_json.name
             parsed_args.input_json.close()
-            payload = json.loads(self.run_processing_input)
+            payload = safe_json_loads(self.run_processing_input)
             payload["_source_file"] = file_name
             self.run_processing_input = json.dumps(payload)
 
@@ -674,7 +693,7 @@ class Transfer(AddCMD):
             self.transfer_input = parsed_args.input_json.read()
             file_name = parsed_args.input_json.name
             parsed_args.input_json.close()
-            payload = json.loads(self.transfer_input)
+            payload = safe_json_loads(self.transfer_input)
             payload["_source_file"] = file_name
             self.transfer_input = json.dumps(payload)
         if not self.transfer_input:
@@ -719,7 +738,7 @@ class GenPipes(AddCMD):
             self.genpipes_input = parsed_args.input_json.read()
             file_name = parsed_args.input_json.name
             parsed_args.input_json.close()
-            payload = json.loads(self.genpipes_input)
+            payload = safe_json_loads(self.genpipes_input)
             payload["_source_file"] = file_name
             self.genpipes_input = json.dumps(payload)
         if not self.genpipes_input:
@@ -764,13 +783,13 @@ class DeliveryIngest(AddCMD):
             self.delivery_input = parsed_args.input_json.read()
             file_name = parsed_args.input_json.name
             parsed_args.input_json.close()
-            payload = json.loads(self.delivery_input)
+            payload = safe_json_loads(self.delivery_input)
             payload["_source_file"] = file_name
             self.delivery_input = json.dumps(payload)
         if not self.delivery_input:
             raise BadArgumentError
 
-        self.delivery_input = json.loads(self.delivery_input)
+        self.delivery_input = safe_json_loads(self.delivery_input)
         self.delivery_input["delete"] = parsed_args.delete
         self.delivery_input = json.dumps(self.delivery_input, ensure_ascii=False, indent=4)
 
@@ -817,7 +836,7 @@ class Edit(AddCMD):
 
         # Add dry_run flag if set
         if parsed_args.dry_run:
-            self.edit_input = json.loads(self.edit_input)
+            self.edit_input = safe_json_loads(self.edit_input)
             self.edit_input["dry_run"] = True
             self.edit_input = json.dumps(self.edit_input, ensure_ascii=False, indent=4)
 
@@ -867,21 +886,21 @@ class Delete(AddCMD):
 
         # Add dry_run flag if set
         if parsed_args.dry_run:
-            self.delete_input = json.loads(self.delete_input)
+            self.delete_input = safe_json_loads(self.delete_input)
             self.delete_input["dry_run"] = True
             self.delete_input = json.dumps(self.delete_input, ensure_ascii=False, indent=4)
 
         # Adding cascade options to the input
         if parsed_args.cascade_down:
-            self.delete_input = json.loads(self.delete_input)
+            self.delete_input = safe_json_loads(self.delete_input)
             self.delete_input["cascade_down"] = True
             self.delete_input = json.dumps(self.delete_input, ensure_ascii=False, indent=4)
         elif parsed_args.cascade_up:
-            self.delete_input = json.loads(self.delete_input)
+            self.delete_input = safe_json_loads(self.delete_input)
             self.delete_input["cascade_up"] = True
             self.delete_input = json.dumps(self.delete_input, ensure_ascii=False, indent=4)
         elif parsed_args.cascade:
-            self.delete_input = json.loads(self.delete_input)
+            self.delete_input = safe_json_loads(self.delete_input)
             self.delete_input["cascade"] = True
             self.delete_input = json.dumps(self.delete_input, ensure_ascii=False, indent=4)
 
@@ -931,21 +950,21 @@ class UnDelete(AddCMD):
 
         # Add dry_run flag if set
         if parsed_args.dry_run:
-            self.undelete_input = json.loads(self.undelete_input)
+            self.undelete_input = safe_json_loads(self.undelete_input)
             self.undelete_input["dry_run"] = True
             self.undelete_input = json.dumps(self.undelete_input, ensure_ascii=False, indent=4)
 
         # Adding cascade options to the input
         if parsed_args.cascade_down:
-            self.undelete_input = json.loads(self.undelete_input)
+            self.undelete_input = safe_json_loads(self.undelete_input)
             self.undelete_input["cascade_down"] = True
             self.undelete_input = json.dumps(self.undelete_input, ensure_ascii=False, indent=4)
         elif parsed_args.cascade_up:
-            self.undelete_input = json.loads(self.undelete_input)
+            self.undelete_input = safe_json_loads(self.undelete_input)
             self.undelete_input["cascade_up"] = True
             self.undelete_input = json.dumps(self.undelete_input, ensure_ascii=False, indent=4)
         elif parsed_args.cascade:
-            self.undelete_input = json.loads(self.undelete_input)
+            self.undelete_input = safe_json_loads(self.undelete_input)
             self.undelete_input["cascade"] = True
             self.undelete_input = json.dumps(self.undelete_input, ensure_ascii=False, indent=4)
 
@@ -995,21 +1014,21 @@ class Deprecate(AddCMD):
 
         # Add dry_run flag if set
         if parsed_args.dry_run:
-            self.deprecate_input = json.loads(self.deprecate_input)
+            self.deprecate_input = safe_json_loads(self.deprecate_input)
             self.deprecate_input["dry_run"] = True
             self.deprecate_input = json.dumps(self.deprecate_input, ensure_ascii=False, indent=4)
 
         # Adding cascade options to the input
         if parsed_args.cascade_down:
-            self.deprecate_input = json.loads(self.deprecate_input)
+            self.deprecate_input = safe_json_loads(self.deprecate_input)
             self.deprecate_input["cascade_down"] = True
             self.deprecate_input = json.dumps(self.deprecate_input, ensure_ascii=False, indent=4)
         elif parsed_args.cascade_up:
-            self.deprecate_input = json.loads(self.deprecate_input)
+            self.deprecate_input = safe_json_loads(self.deprecate_input)
             self.deprecate_input["cascade_up"] = True
             self.deprecate_input = json.dumps(self.deprecate_input, ensure_ascii=False, indent=4)
         elif parsed_args.cascade:
-            self.deprecate_input = json.loads(self.deprecate_input)
+            self.deprecate_input = safe_json_loads(self.deprecate_input)
             self.deprecate_input["cascade"] = True
             self.deprecate_input = json.dumps(self.deprecate_input, ensure_ascii=False, indent=4)
 
@@ -1059,21 +1078,21 @@ class UnDeprecate(AddCMD):
 
         # Add dry_run flag if set
         if parsed_args.dry_run:
-            self.undeprecate_input = json.loads(self.undeprecate_input)
+            self.undeprecate_input = safe_json_loads(self.undeprecate_input)
             self.undeprecate_input["dry_run"] = True
             self.undeprecate_input = json.dumps(self.undeprecate_input, ensure_ascii=False, indent=4)
 
         # Adding cascade options to the input
         if parsed_args.cascade_down:
-            self.undeprecate_input = json.loads(self.undeprecate_input)
+            self.undeprecate_input = safe_json_loads(self.undeprecate_input)
             self.undeprecate_input["cascade_down"] = True
             self.undeprecate_input = json.dumps(self.undeprecate_input, ensure_ascii=False, indent=4)
         elif parsed_args.cascade_up:
-            self.undeprecate_input = json.loads(self.undeprecate_input)
+            self.undeprecate_input = safe_json_loads(self.undeprecate_input)
             self.undeprecate_input["cascade_up"] = True
             self.undeprecate_input = json.dumps(self.undeprecate_input, ensure_ascii=False, indent=4)
         elif parsed_args.cascade:
-            self.undeprecate_input = json.loads(self.undeprecate_input)
+            self.undeprecate_input = safe_json_loads(self.undeprecate_input)
             self.undeprecate_input["cascade"] = True
             self.undeprecate_input = json.dumps(self.undeprecate_input, ensure_ascii=False, indent=4)
 
@@ -1125,21 +1144,21 @@ class Curate(AddCMD):
 
         # Add dry_run flag if set
         if parsed_args.dry_run:
-            self.curate_input = json.loads(self.curate_input)
+            self.curate_input = safe_json_loads(self.curate_input)
             self.curate_input["dry_run"] = True
             self.curate_input = json.dumps(self.curate_input, ensure_ascii=False, indent=4)
 
         # Adding cascade options to the input
         if parsed_args.cascade_down:
-            self.curate_input = json.loads(self.curate_input)
+            self.curate_input = safe_json_loads(self.curate_input)
             self.curate_input["cascade_down"] = True
             self.curate_input = json.dumps(self.curate_input, ensure_ascii=False, indent=4)
         elif parsed_args.cascade_up:
-            self.curate_input = json.loads(self.curate_input)
+            self.curate_input = safe_json_loads(self.curate_input)
             self.curate_input["cascade_up"] = True
             self.curate_input = json.dumps(self.curate_input, ensure_ascii=False, indent=4)
         elif parsed_args.cascade:
-            self.curate_input = json.loads(self.curate_input)
+            self.curate_input = safe_json_loads(self.curate_input)
             self.curate_input["cascade"] = True
             self.curate_input = json.dumps(self.curate_input, ensure_ascii=False, indent=4)
 
