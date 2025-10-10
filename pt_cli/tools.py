@@ -234,7 +234,11 @@ class ReadsetFile(AddCMD):
         '''
         :return: list of readset lines of GenPipes of the API call for digest_readset_file
         '''
-        json_payload = json.dumps(self.parsed_input)
+        if isinstance(self.parsed_input, str):
+            parsed_dict = json.loads(self.parsed_input)
+        else:
+            parsed_dict = self.parsed_input
+        json_payload = json.dumps(parsed_dict)
         encoded_json = urllib.parse.quote(json_payload)
         return self.get(f'project/{self.project_id}/digest_readset_file?json={encoded_json}')
 
@@ -345,7 +349,11 @@ class PairFile(AddCMD):
         Returns a list of pair lines of GenPipes of the API call for digest_pair_file
         :return:
         '''
-        json_payload = json.dumps(self.parsed_input)
+        if isinstance(self.parsed_input, str):
+            parsed_dict = json.loads(self.parsed_input)
+        else:
+            parsed_dict = self.parsed_input
+        json_payload = json.dumps(parsed_dict)
         encoded_json = urllib.parse.quote(json_payload)
         return self.get(f'project/{self.project_id}/digest_pair_file?json={encoded_json}')
 
@@ -463,7 +471,11 @@ class Unanalyzed(AddCMD):
         Returns a list of pair lines of GenPipes of the API call for digest_unanalyzed
         :return:
         '''
-        json_payload = json.dumps(self.parsed_input)
+        if isinstance(self.parsed_input, str):
+            parsed_dict = json.loads(self.parsed_input)
+        else:
+            parsed_dict = self.parsed_input
+        json_payload = json.dumps(parsed_dict)
         encoded_json = urllib.parse.quote(json_payload)
         return self.get(f'project/{self.project_id}/digest_unanalyzed?json={encoded_json}')
 
@@ -545,7 +557,11 @@ class Delivery(AddCMD):
         Returns a list of pair lines of GenPipes of the API call for digest_delivery
         :return:
         '''
-        json_payload = json.dumps(self.parsed_input)
+        if isinstance(self.parsed_input, str):
+            parsed_dict = json.loads(self.parsed_input)
+        else:
+            parsed_dict = self.parsed_input
+        json_payload = json.dumps(parsed_dict)
         encoded_json = urllib.parse.quote(json_payload)
         return self.get(f'project/{self.project_id}/digest_delivery?json={encoded_json}')
 
@@ -594,11 +610,11 @@ class Delivery(AddCMD):
                 soup = bs4.BeautifulSoup(delivery, features="html5lib")
                 return sys.stdout.write(soup.get_text())
             # else case, not explicitely written
-            return sys.stdout.write(json.dumps(delivery["DB_ACTION_OUTPUT"]))
+            return sys.stdout.write(json.dumps(delivery["DB_ACTION_OUTPUT"][0]))
         if not delivery:
             raise EmptyGetError
         with open(self.output_file, "w", encoding="utf-8") as out_pair_file:
-            json.dump(delivery["DB_ACTION_OUTPUT"], out_pair_file, ensure_ascii=False, indent=4)
+            json.dump(delivery["DB_ACTION_OUTPUT"][0], out_pair_file, ensure_ascii=False, indent=4)
             logger.info(f"Delivery file written to {self.output_file}")
 
     def func(self, parsed_args):
