@@ -132,7 +132,8 @@ class OAuthNego():
             if isinstance(data, str):
                 soup = bs4.BeautifulSoup(data, features="html5lib")
                 if soup.get_text().startswith("----------"):
-                    sys.stdout.write(soup.get_text())
+                    # No more printing here otherwise it gets printed twice and without proper parsing
+                    pass
                 elif soup.get_text().startswith("Welcome"):
                     sys.stdout.write(soup.get_text())
                 else:
