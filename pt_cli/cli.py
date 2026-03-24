@@ -10,24 +10,10 @@ import shtab
 import yaml
 
 from pt_cli.connect import Pt_Cli
-from pt_cli.tools import (
-        Digest,
-        Ingest,
-        ReadsetFile,
-        PairFile,
-        Unanalyzed,
-        Delivery,
-        RunProcessing,
-        Transfer,
-        GenPipes,
-        DeliveryIngest,
-        Edit,
-        Delete,
-        UnDelete,
-        Deprecate,
-        UnDeprecate,
-        Curate
-        )
+from pt_cli.admin import register_admin_commands
+from pt_cli.digest import register_digest_commands
+from pt_cli.ingest import register_ingest_commands
+from pt_cli.modification import register_modification_commands
 
 from .__version__ import __version__
 
@@ -47,7 +33,7 @@ def get_main_parser(args=None):
     parser.add_argument('--project', help='Project you are working on', default=None)
 
     group = parser.add_mutually_exclusive_group()
-    group.add_argument('--data-file', help='File use in a post', type=argparse.FileType('r'), default=None).complete = shtab.FILE
+    group.add_argument('--data-file', help='File use in a post', type=argparse.FileType('r'), default=None).complete = shtab.FILE # type: ignore
     group.add_argument('--data', help='String to use in a post', default=None)
     parser.add_argument('--loglevel', help='Set log level', choices=list(logging._levelToName.values()), default='INFO')
     parser.add_argument('--info', help='Get current client config', action='store_true')
@@ -122,7 +108,11 @@ def main(args=None, set_logger=True):
     subparser = parser.add_subparsers(help='use the api routes directly')
 
     def help(parsed_local):
-        return sys.stdout.write(connector_session.help())
+        help_content = connector_session.help()
+        if isinstance(help_content, str):
+            return sys.stdout.write(help_content)
+        else:
+            return sys.stdout.write(json.dumps(help_content))
 
     help_parser = subparser.add_parser(
         'help',
@@ -133,9 +123,11 @@ def main(args=None, set_logger=True):
 
     def route(parsed_local):
         url = parsed_local.url.replace('//', '/').strip('/')
-        if post_data:
+        method = parsed_local.method if parsed_local.method else ('POST' if post_data else 'GET')
+
+        if method == 'POST':
             logger.debug(f'POST to {url}')
-            response = connector_session.post(url, post_data)
+            response = connector_session.post(url, post_data or '')
         else:
             logger.debug(f'GET from {url}')
             response = connector_session.get(url)
@@ -148,6 +140,8 @@ def main(args=None, set_logger=True):
 
     parser_url = subparser.add_parser('route', help='To use any url described in help', add_help=False)
     parser_url.add_argument('url')
+    parser_url.add_argument('--method', choices=['GET', 'POST'], default=None,
+                            help='Explicit HTTP method. If omitted, POST is used when --data/--data-file is provided, otherwise GET.')
     parser_url.set_defaults(func=route)
 
     def projects(parsed_local):
@@ -156,24 +150,11 @@ def main(args=None, set_logger=True):
     parser_project = subparser.add_parser('projects', help='List all projects', add_help=False)
     parser_project.set_defaults(func=projects)
 
-    digest_subparser = Digest(subparser).subparser
-    ReadsetFile(connection_obj=connector_session, subparser=digest_subparser)
-    PairFile(connection_obj=connector_session, subparser=digest_subparser)
-    Unanalyzed(connection_obj=connector_session, subparser=digest_subparser)
-    Delivery(connection_obj=connector_session, subparser=digest_subparser)
+    register_admin_commands(subparser=subparser, connection_obj=connector_session)
+    register_digest_commands(subparser=subparser, connection_obj=connector_session)
+    register_ingest_commands(subparser=subparser, connection_obj=connector_session)
 
-    ingest_subparser = Ingest(subparser).subparser
-    RunProcessing(connection_obj=connector_session, subparser=ingest_subparser)
-    Transfer(connection_obj=connector_session, subparser=ingest_subparser)
-    GenPipes(connection_obj=connector_session, subparser=ingest_subparser)
-    DeliveryIngest(connection_obj=connector_session, subparser=ingest_subparser)
-
-    Edit(connection_obj=connector_session, subparser=subparser)
-    Delete(connection_obj=connector_session, subparser=subparser)
-    UnDelete(connection_obj=connector_session, subparser=subparser)
-    Deprecate(connection_obj=connector_session, subparser=subparser)
-    UnDeprecate(connection_obj=connector_session, subparser=subparser)
-    Curate(connection_obj=connector_session, subparser=subparser)
+    register_modification_commands(subparser=subparser, connection_obj=connector_session)
 
     shtab.add_argument_to(parser, ["-s", "--print-completion"])
 

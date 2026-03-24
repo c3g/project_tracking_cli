@@ -12,5 +12,6 @@ pdm*
 dist/
 
 # Tests
+.test
 pair_file.csv
 readset_file.tsv

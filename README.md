@@ -25,6 +25,36 @@ To access one of the routes listed with the `help` cmd, here `/project`
 pt-cli --url-root https://c3g-portal.dev-sd4h.ca route /project
 ```
 
+The `route` command auto-selects HTTP method:
+- `POST` when `--data` or `--data-file` is provided
+- `GET` otherwise
+
+You can override this with `--method` when an endpoint requires a specific verb.
+
+```bash
+# Force POST even without a payload
+pt-cli --url-root https://c3g-portal.dev-sd4h.ca route /admin/create_project/cphi-test --method POST
+
+# Explicit GET
+pt-cli --url-root https://c3g-portal.dev-sd4h.ca route /project --method GET
+```
+
+For project creation with optional JSON metadata, you can use the dedicated command:
+
+```bash
+# Create/fetch project by name only
+pt-cli --url-root https://c3g-portal.dev-sd4h.ca admin create-project --name cphi-test
+
+# Create/fetch project with external metadata sent as JSON body
+pt-cli --url-root https://c3g-portal.dev-sd4h.ca admin create-project --name cphi-test --ext-id 123 --ext-src lims
+```
+
+Equivalent raw route form:
+
+```bash
+pt-cli --url-root https://c3g-portal.dev-sd4h.ca --data '{"ext_id":123,"ext_src":"lims"}' route /admin/create_project/cphi-test --method POST
+```
+
 
 ## Test the client on a local server (developer mode)
 Make sure that you are installing pt-cli in dev mode (pip's `-e` option), so the source code modifications are reflected automatically in the installation
@@ -43,7 +73,9 @@ Once you have a [project_tracking server running on your local machine](https://
 # Printing all routes
 pt-cli --url-root http://127.0.0.1:5000 help
 # Creating a project named my-project
-pt-cli --url-root http://127.0.0.1:5000  route /admin/create_project/my-project
+pt-cli --url-root http://127.0.0.1:5000 route /admin/create_project/my-project --method POST
+# Creating a project with metadata
+pt-cli --url-root http://127.0.0.1:5000 admin create-project --name my-project --ext-id 1 --ext-src lims
 # Should return
 # {"creation": "2023-04-13T13:50:39.781030", "id": 1, "name": "MY-PROJECT", "tablename": "project"}
 # Checking what projects are available
