@@ -55,6 +55,7 @@ class RunProcessing(AddCMD):
 
     def arguments(self):
         self.parser.add_argument('--input-json', help="Json file containing all information to add data from Run Processing into the database", type=argparse.FileType('r')).complete = shtab.FILE  # type: ignore[attr-defined]
+        self.parser.add_argument('--force', action='store_true', default=False, help="Force ingestion, bypassing certain validation checks")
 
     @property
     def run_processing(self):
@@ -73,6 +74,10 @@ class RunProcessing(AddCMD):
 
         if not self.run_processing_input:
             raise BadArgumentError
+
+        self.run_processing_input = safe_json_loads(self.run_processing_input)
+        self.run_processing_input["force"] = parsed_args.force
+        self.run_processing_input = json.dumps(self.run_processing_input, ensure_ascii=False, indent=4)
 
         response = self.run_processing
         if isinstance(response, str) and response.startswith("Welcome"):
@@ -136,6 +141,7 @@ class GenPipes(AddCMD):
 
     def arguments(self):
         self.parser.add_argument('--input-json', help="Json file containing all information to add a GenPipes analysis into the database", type=argparse.FileType('r')).complete = shtab.FILE  # type: ignore[attr-defined]
+        self.parser.add_argument('--force', action='store_true', default=False, help="Force ingestion, bypassing certain validation checks")
 
     @property
     def genpipes(self):
@@ -153,6 +159,10 @@ class GenPipes(AddCMD):
             self.genpipes_input = json.dumps(payload)
         if not self.genpipes_input:
             raise BadArgumentError
+
+        self.genpipes_input = safe_json_loads(self.genpipes_input)
+        self.genpipes_input["force"] = parsed_args.force
+        self.genpipes_input = json.dumps(self.genpipes_input, ensure_ascii=False, indent=4)
 
         response = self.genpipes
         if isinstance(response, str) and response.startswith("Welcome"):
