@@ -8,7 +8,7 @@ import urllib.parse
 import shtab
 import bs4
 
-from pt_cli.tools import AddCMD, BadArgumentError, EmptyGetError, safe_json_loads, unroll
+from pt_cli.tools import AddCMD, BadArgumentError, EmptyGetError, unroll
 
 logger = logging.getLogger(__name__)
 
@@ -252,16 +252,6 @@ class PairFile(AddCMD):
                 self.parsed_input = json.dumps(self.jsonify_input(parsed_args), ensure_ascii=False, indent=4)
             else:
                 raise BadArgumentError("Either use --input-json OR --specimen_<name|id>/--sample_<name|id>/--readset_<name|id> + --endpoint + --nucleic_acid_type arguments.")
-
-        loaded_json = safe_json_loads(self.parsed_input)
-        if loaded_json.get("sample_name") and not (len(loaded_json["sample_name"]) % 2) == 0:
-            logger.warning("An odd amount of 'sample_name' has been given, the pair file won't be properly formatted for GenPipes!")
-        if loaded_json.get("sample_id") and not (len(loaded_json["sample_id"]) % 2) == 0:
-            logger.warning("An odd amount of 'sample_id' has been given, the pair file won't be properly formatted for GenPipes!")
-        if loaded_json.get("readset_name") and not (len(loaded_json["readset_name"]) % 2) == 0:
-            logger.warning("An odd amount of 'readset_name' has been given, the pair file won't be properly formatted for GenPipes!")
-        if loaded_json.get("readset_id") and not (len(loaded_json["readset_id"]) % 2) == 0:
-            logger.warning("An odd amount of 'readset_id' has been given, the pair file won't be properly formatted for GenPipes!")
 
         self.output_file = parsed_args.output
         self.json_to_pair_file()

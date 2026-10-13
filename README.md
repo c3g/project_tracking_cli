@@ -1,6 +1,6 @@
 # pt-cli
 
-This is the c3g database [client](https://github.com/c3g/project_tracking_cli)  to talk with [project tracking](https://github.com/c3g/project_tracking), the c3g database api!
+pt-cli is the C3G database [client](https://github.com/c3g/project_tracking_cli). It communicates with [project tracking](https://github.com/c3g/project_tracking), the C3G database API.
 
 To install:
 
@@ -20,16 +20,16 @@ To query the api at c3g-portal.dev-sd4h.ca:
 pt-cli --url-root https://c3g-portal.dev-sd4h.ca help
 ```
 
-To access one of the routes listed with the `help` cmd, here `/project`
+To access a route from the `help` command list, for example `/project`, run this command:
 ```bash 
 pt-cli --url-root https://c3g-portal.dev-sd4h.ca route /project
 ```
 
-The `route` command auto-selects HTTP method:
-- `POST` when `--data` or `--data-file` is provided
-- `GET` otherwise
+The `route` command selects the HTTP method:
+- `POST`, when you give `--data` or `--data-file`
+- `GET`, in all other cases
 
-You can override this with `--method` when an endpoint requires a specific verb.
+If an endpoint needs a specific HTTP verb, you can set it with `--method`.
 
 ```bash
 # Force POST even without a payload
@@ -39,7 +39,7 @@ pt-cli --url-root https://c3g-portal.dev-sd4h.ca route /admin/create_project/cph
 pt-cli --url-root https://c3g-portal.dev-sd4h.ca route /project --method GET
 ```
 
-For project creation with optional JSON metadata, you can use the dedicated command:
+To create a project with optional JSON metadata, use the dedicated command:
 
 ```bash
 # Create/fetch project by name only
@@ -57,7 +57,7 @@ pt-cli --url-root https://c3g-portal.dev-sd4h.ca --data '{"ext_id":123,"ext_src"
 
 
 ## Test the client on a local server (developer mode)
-Make sure that you are installing pt-cli in dev mode (pip's `-e` option), so the source code modifications are reflected automatically in the installation
+Install pt-cli in dev mode, with pip's `-e` option. This mode applies your source code changes to the installation automatically.
 ```bash
 git clone https://github.com/c3g/project_tracking_cli
 cd project_tracking_cli/
@@ -67,7 +67,7 @@ pip install -e .
 pt-cli -h
 ```
 
-Once you have a [project_tracking server running on your local machine](https://github.com/c3g/project_tracking#from-github-with-sqlite-best-for-developer) you can test that the client is working properly and add features to it.
+After you start a [project_tracking server on your local machine](https://github.com/c3g/project_tracking#from-github-with-sqlite-best-for-developer), you can test the client and add new features.
 
 ```bash
 # Printing all routes
@@ -84,7 +84,7 @@ pt-cli --url-root http://127.0.0.1:5000  route project
 # {"Projetc list": ["MY-PROJECT"]}
 ```
 
-## Having <TAB> completion
+## Tab completion
 
 ```bash
 # Generating completion file for bash
@@ -94,4 +94,4 @@ pt-cli -s zsh > _pt-cli
 # For oh-my-zsh users
 pt-cli -s zsh > ~/.oh-my-zsh/completions/_pt-cli
 ```
-Once done `source` the file created (or reload your environment for omz users) to have completion enabled.
+After you generate the file, run `source` on it to enable tab completion. If you use oh-my-zsh, reload your environment instead.

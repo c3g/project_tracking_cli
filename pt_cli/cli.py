@@ -98,6 +98,8 @@ def main(args=None, set_logger=True):
     if parsed.info:
         sys.stdout.write('Config:\n')
         for key, value in config.items():
+            if key == 'password' and value:
+                value = '********'
             sys.stdout.write(f'{key}: {value}\n')
         sys.exit(0)
 
@@ -122,7 +124,11 @@ def main(args=None, set_logger=True):
     help_parser.set_defaults(func=help)
 
     def route(parsed_local):
-        url = parsed_local.url.replace('//', '/').strip('/')
+        # Only clean the path: the query string may hold URIs such as "abacus:///path"
+        path, sep, query = parsed_local.url.partition('?')
+        while '//' in path:
+            path = path.replace('//', '/')
+        url = path.strip('/') + sep + query
         method = parsed_local.method if parsed_local.method else ('POST' if post_data else 'GET')
 
         if method == 'POST':
