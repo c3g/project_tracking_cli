@@ -14,6 +14,7 @@ from pt_cli.admin import register_admin_commands
 from pt_cli.digest import register_digest_commands
 from pt_cli.ingest import register_ingest_commands
 from pt_cli.modification import register_modification_commands
+from pt_cli.sample_group import register_sample_group_commands
 
 from .__version__ import __version__
 
@@ -171,6 +172,7 @@ def main(args=None, set_logger=True):
     register_ingest_commands(subparser=subparser, connection_obj=connector_session)
 
     register_modification_commands(subparser=subparser, connection_obj=connector_session)
+    register_sample_group_commands(subparser=subparser, connection_obj=connector_session)
 
     shtab.add_argument_to(parser, ["-s", "--print-completion"])
 
