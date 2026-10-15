@@ -55,6 +55,14 @@ Equivalent raw route form:
 pt-cli --url-root https://c3g-portal.dev-sd4h.ca --data '{"ext_id":123,"ext_src":"lims"}' route /admin/create_project/cphi-test --method POST
 ```
 
+To list the values the server accepts for controlled fields, run this command. It shows the enum values
+(e.g. `readset_state`, `readset_lane`) and the analysis operations accepted by `ingest analysis`
+(`operation_name`, `operation_pipeline`, `operation_protocol`):
+
+```bash
+pt-cli --url-root https://c3g-portal.dev-sd4h.ca vocabulary
+```
+
 
 ## Test the client on a local server (developer mode)
 Install pt-cli in dev mode, with pip's `-e` option. This mode applies your source code changes to the installation automatically.

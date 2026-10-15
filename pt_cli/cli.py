@@ -156,6 +156,16 @@ def main(args=None, set_logger=True):
     parser_project = subparser.add_parser('projects', help='List all projects', add_help=False)
     parser_project.set_defaults(func=projects)
 
+    def vocabulary(parsed_local):
+        return sys.stdout.write(json.dumps(connector_session.vocabulary(), indent=4))
+
+    parser_vocabulary = subparser.add_parser(
+        'vocabulary',
+        help='List the controlled vocabularies: enum values and the analysis operations accepted by ingest analysis',
+        add_help=False
+    )
+    parser_vocabulary.set_defaults(func=vocabulary)
+
     register_admin_commands(subparser=subparser, connection_obj=connector_session)
     register_digest_commands(subparser=subparser, connection_obj=connector_session)
     register_ingest_commands(subparser=subparser, connection_obj=connector_session)

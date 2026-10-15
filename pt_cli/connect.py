@@ -179,5 +179,8 @@ class Pt_Cli(OAuthNego):
     def projects(self):
         return self.get("project")
 
+    def vocabulary(self):
+        return self.get("vocabulary")
+
     def help(self):
         return self.get("help")
