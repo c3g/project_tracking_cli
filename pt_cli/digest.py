@@ -2,6 +2,7 @@ import argparse
 import csv
 import json
 import logging
+import os
 import sys
 import urllib.parse
 
@@ -34,6 +35,7 @@ def register_digest_commands(subparser, connection_obj):
     digest_subparser = Digest(subparser).subparser
     ReadsetFile(connection_obj=connection_obj, subparser=digest_subparser)
     PairFile(connection_obj=connection_obj, subparser=digest_subparser)
+    OncoanalyserSamplesheet(connection_obj=connection_obj, subparser=digest_subparser)
     Unanalyzed(connection_obj=connection_obj, subparser=digest_subparser)
     Delivery(connection_obj=connection_obj, subparser=digest_subparser)
 
@@ -152,6 +154,101 @@ class ReadsetFile(AddCMD):
         self.output_file = parsed_args.output
         self.json_to_readset_file()
 
+
+class OncoanalyserSamplesheet(ReadsetFile):
+    """
+    OncoanalyserSamplesheet is a sub-command of Digest subparser: the sample groups of the selected specimens, or the
+    named groups, written as one nf-core/oncoanalyser samplesheet per group
+    """
+    __tool_name__ = 'oncoanalyser_samplesheet'
+    SAMPLESHEET_HEADER = [
+            "group_id",
+            "subject_id",
+            "sample_id",
+            "sample_type",
+            "sequence_type",
+            "filetype",
+            "info",
+            "filepath"
+            ]
+
+    def help(self):
+        return (
+            "Will write one nf-core/oncoanalyser samplesheet per sample group, <group>.samplesheet.csv, DNA and RNA "
+            "together unless --nucleic_acid_type is given. /!\\ Either use --input-json OR "
+            "--specimen_<name|id>/--sample_group_name + --endpoint arguments"
+        )
+
+    def arguments(self):
+        self.parser.add_argument('--output-dir', '-o', default=".", help="Directory of the samplesheets returned (Default: current directory)")
+        self.parser.add_argument('--specimen_name', help='Specimen Name whose sample groups are selected', nargs='+')
+        self.parser.add_argument('--specimen_id', help='Specimen ID whose sample groups are selected', nargs='+')
+        self.parser.add_argument('--sample_group_name', help='Sample group Name to be selected', nargs='+')
+        self.parser.add_argument('--nucleic_acid_type', help="nucleic_acid_type data type, DNA and RNA when missing", required=False, choices=["DNA", "RNA"])
+        self.parser.add_argument('--endpoint', help="Endpoint in which data is located")
+        self.parser.add_argument('--input-json', help="Json file with specimens or sample groups and endpoint to be selected", type=argparse.FileType('r')).complete = shtab.FILE  # type: ignore[attr-defined]
+
+    def jsonify_input(self, parsed_args):
+        json = {
+            "location_endpoint": parsed_args.endpoint,
+            "experiment_nucleic_acid_type": parsed_args.nucleic_acid_type
+        }
+        if parsed_args.specimen_name:
+            json["specimen_name"] = list(parsed_args.specimen_name)
+        if parsed_args.specimen_id:
+            if len(parsed_args.specimen_id) == 1:
+                json["specimen_id"] = unroll(parsed_args.specimen_id[0])
+            else:
+                json["specimen_id"] = parsed_args.specimen_id
+        if parsed_args.sample_group_name:
+            json["sample_group_name"] = list(parsed_args.sample_group_name)
+        return json
+
+    @property
+    def readset_file(self):
+        if isinstance(self.parsed_input, str):
+            parsed_dict = json.loads(self.parsed_input)
+        else:
+            parsed_dict = self.parsed_input
+        encoded_json = urllib.parse.quote(json.dumps(parsed_dict))
+        return self.get(f'project/{self.project_id}/digest_oncoanalyser_samplesheet?json={encoded_json}')
+
+    def json_to_readset_file(self):
+        samplesheet = self.readset_file
+        if not samplesheet:
+            raise EmptyGetError
+        samplesheet = samplesheet["DB_ACTION_OUTPUT"]
+        if not samplesheet:
+            sys.stdout.write("Nothing returned.")
+            return
+        if self.output_file is None:
+            raise BadArgumentError("Missing output directory")
+        groups = {}
+        for row in samplesheet:
+            groups.setdefault(row["group_id"], []).append(row)
+        os.makedirs(self.output_file, exist_ok=True)
+        for group_id, rows in groups.items():
+            path = os.path.join(self.output_file, f"{group_id}.samplesheet.csv")
+            with open(path, "w", encoding="utf-8", newline="") as out_samplesheet:
+                csv_writer = csv.DictWriter(out_samplesheet, fieldnames=self.SAMPLESHEET_HEADER, lineterminator="\n")
+                csv_writer.writeheader()
+                for row in rows:
+                    csv_writer.writerow(row)
+            logger.info(f"Samplesheet written to {path}")
+
+    def func(self, parsed_args):
+        AddCMD.func(self, parsed_args)
+        self.parsed_input = self.data()
+        if not self.parsed_input:
+            if parsed_args.input_json:
+                self.parsed_input = parsed_args.input_json.read()
+                parsed_args.input_json.close()
+            elif (parsed_args.specimen_name or parsed_args.specimen_id or parsed_args.sample_group_name) and parsed_args.endpoint:
+                self.parsed_input = json.dumps(self.jsonify_input(parsed_args), ensure_ascii=False, indent=4)
+            else:
+                raise BadArgumentError("Either use --input-json OR --specimen_<name|id>/--sample_group_name + --endpoint arguments.")
+        self.output_file = parsed_args.output_dir
+        self.json_to_readset_file()
 
 class PairFile(AddCMD):
     """

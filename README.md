@@ -64,6 +64,15 @@ pt-cli --url-root https://c3g-portal.dev-sd4h.ca vocabulary
 ```
 
 
+To write one [nf-core/oncoanalyser samplesheet](https://nf-co.re/oncoanalyser/latest/docs/usage/#samplesheet)
+per sample group, `<group>.samplesheet.csv`, for every group of the given specimens or the named groups,
+DNA and RNA together unless you give `--nucleic_acid_type`:
+
+```bash
+pt-cli --url-root https://c3g-portal.dev-sd4h.ca --project MOH-Q digest oncoanalyser_samplesheet --specimen_name MoHQ-CM-5-208 --endpoint abacus -o samplesheets/
+pt-cli --url-root https://c3g-portal.dev-sd4h.ca --project MOH-Q digest oncoanalyser_samplesheet --sample_group_name MoHQ-CM-5-208_G1 --endpoint abacus
+```
+
 ## Test the client on a local server (developer mode)
 Install pt-cli in dev mode, with pip's `-e` option. This mode applies your source code changes to the installation automatically.
 ```bash
