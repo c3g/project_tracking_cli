@@ -36,7 +36,7 @@ def register_ingest_commands(subparser, connection_obj):
     ingest_subparser = Ingest(subparser).subparser
     RunProcessing(connection_obj=connection_obj, subparser=ingest_subparser)
     Transfer(connection_obj=connection_obj, subparser=ingest_subparser)
-    GenPipes(connection_obj=connection_obj, subparser=ingest_subparser)
+    Analysis(connection_obj=connection_obj, subparser=ingest_subparser)
     DeliveryIngest(connection_obj=connection_obj, subparser=ingest_subparser)
 
 
@@ -126,45 +126,45 @@ class Transfer(AddCMD):
             _write_db_action_output(response)
 
 
-class GenPipes(AddCMD):
+class Analysis(AddCMD):
     """
-    GenPipes is a sub-command of Ingest subparser using base AddCMD class
+    Analysis is a sub-command of Ingest subparser using base AddCMD class
     """
-    __tool_name__ = 'genpipes'
+    __tool_name__ = 'analysis'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.genpipes_input = None
+        self.analysis_input = None
 
     def help(self):
-        return "Will push a GenPipes analysis into the database"
+        return "Will push an analysis operation (e.g. a GenPipes run) into the database"
 
     def arguments(self):
-        self.parser.add_argument('--input-json', help="Json file containing all information to add a GenPipes analysis into the database", type=argparse.FileType('r')).complete = shtab.FILE  # type: ignore[attr-defined]
+        self.parser.add_argument('--input-json', help="Json file containing all information to add an analysis operation (e.g. a GenPipes run) into the database", type=argparse.FileType('r')).complete = shtab.FILE  # type: ignore[attr-defined]
         self.parser.add_argument('--force', action='store_true', default=False, help="Force ingestion, bypassing certain validation checks")
 
     @property
-    def genpipes(self):
-        return self.post(f'project/{self.project_id}/ingest_genpipes', data=self.genpipes_input)
+    def analysis(self):
+        return self.post(f'project/{self.project_id}/ingest_analysis', data=self.analysis_input)
 
     def func(self, parsed_args):
         super().func(parsed_args)
-        self.genpipes_input = self.data()
-        if not self.genpipes_input and parsed_args.input_json:
-            self.genpipes_input = parsed_args.input_json.read()
+        self.analysis_input = self.data()
+        if not self.analysis_input and parsed_args.input_json:
+            self.analysis_input = parsed_args.input_json.read()
             file_name = parsed_args.input_json.name
             parsed_args.input_json.close()
-            payload = safe_json_loads(self.genpipes_input)
+            payload = safe_json_loads(self.analysis_input)
             payload["_source_file"] = file_name
-            self.genpipes_input = json.dumps(payload)
-        if not self.genpipes_input:
+            self.analysis_input = json.dumps(payload)
+        if not self.analysis_input:
             raise BadArgumentError
 
-        self.genpipes_input = safe_json_loads(self.genpipes_input)
-        self.genpipes_input["force"] = parsed_args.force
-        self.genpipes_input = json.dumps(self.genpipes_input, ensure_ascii=False, indent=4)
+        self.analysis_input = safe_json_loads(self.analysis_input)
+        self.analysis_input["force"] = parsed_args.force
+        self.analysis_input = json.dumps(self.analysis_input, ensure_ascii=False, indent=4)
 
-        response = self.genpipes
+        response = self.analysis
         if isinstance(response, str) and response.startswith("Welcome"):
             pass
         else:
