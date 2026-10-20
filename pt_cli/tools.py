@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import logging
 import sys
 
 class Error(Exception):
@@ -89,8 +90,34 @@ class AddCMD:
         self.parser = subparser.add_parser(self.__tool_name__, help=self.help(), add_help=True)
         self.arguments()
         self.parser.set_defaults(func=self.func)
-        self.project_id = self.connection_obj.project_id
+        self._project_id = None
         self.parsed_args = None
+
+    @property
+    def project_id(self):
+        """
+        The project of the request: --project, the 'project' of connect.yaml or, for ingestion, the
+        project_name of the payload (see project_from_payload)
+        """
+        project = self._project_id or self.connection_obj.project_id
+        if not project:
+            raise BadArgumentError("No project given: use --project or set 'project' in connect.yaml")
+        return project
+
+    def project_from_payload(self, payload):
+        """
+        Use the payload's project_name when no project is given; warn when the given project differs from it.
+        """
+        project_name = payload.get("project_name") if isinstance(payload, dict) else None
+        if not project_name:
+            return
+        if not self.connection_obj.project_id:
+            self._project_id = project_name
+        elif str(self.connection_obj.project_id).lower() != str(project_name).lower():
+            logging.warning(
+                f"Ingesting into project '{self.connection_obj.project_id}' (--project or connect.yaml) "
+                f"although the payload's project_name is '{project_name}'"
+            )
 
     def data(self, error_if_missing=False):
         """

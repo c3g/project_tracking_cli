@@ -74,6 +74,7 @@ class RunProcessing(AddCMD):
 
         if not self.run_processing_input:
             raise BadArgumentError
+        self.project_from_payload(safe_json_loads(self.run_processing_input))
 
         self.run_processing_input = safe_json_loads(self.run_processing_input)
         self.run_processing_input["force"] = parsed_args.force
@@ -118,6 +119,7 @@ class Transfer(AddCMD):
             self.transfer_input = json.dumps(payload)
         if not self.transfer_input:
             raise BadArgumentError
+        self.project_from_payload(safe_json_loads(self.transfer_input))
 
         response = self.transfer
         if isinstance(response, str) and response.startswith("Welcome"):
@@ -159,6 +161,7 @@ class Analysis(AddCMD):
             self.analysis_input = json.dumps(payload)
         if not self.analysis_input:
             raise BadArgumentError
+        self.project_from_payload(safe_json_loads(self.analysis_input))
 
         self.analysis_input = safe_json_loads(self.analysis_input)
         self.analysis_input["force"] = parsed_args.force
@@ -204,6 +207,7 @@ class DeliveryIngest(AddCMD):
             self.delivery_input = json.dumps(payload)
         if not self.delivery_input:
             raise BadArgumentError
+        self.project_from_payload(safe_json_loads(self.delivery_input))
 
         self.delivery_input = safe_json_loads(self.delivery_input)
         self.delivery_input["delete"] = parsed_args.delete

@@ -55,6 +55,14 @@ Equivalent raw route form:
 pt-cli --url-root https://c3g-portal.dev-sd4h.ca --data '{"ext_id":123,"ext_src":"lims"}' route /admin/create_project/cphi-test --method POST
 ```
 
+Commands working on one project need it: give `--project`, or set `project:` in `./connect.yaml` or
+`~/.config/pt_cli/connect.yaml`. There is no default project. `ingest` commands without one use the
+`project_name` of the JSON. Project names are matched ignoring case, so `--project my-project` finds `MY-PROJECT`.
+
+```bash
+pt-cli --url-root https://c3g-portal.dev-sd4h.ca --project MY-PROJECT ingest run_processing --input-json run_processing.json
+```
+
 To list the values the server accepts for controlled fields, run this command. It shows the enum values
 (e.g. `readset_state`, `readset_lane`) and the analysis operations accepted by `ingest analysis`
 (`operation_name`, `operation_pipeline`, `operation_protocol`):

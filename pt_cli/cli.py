@@ -69,7 +69,7 @@ def main(args=None, set_logger=True):
     config = {
         "url_root": "https://c3g-portal.sd4h.ca",
         "session_file": "~/.pt_cli",
-        "project": "moh-q",
+        "project": None,
         "user": None,
         "password": None
         }
