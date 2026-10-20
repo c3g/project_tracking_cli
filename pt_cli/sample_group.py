@@ -35,6 +35,7 @@ class List(AddCMD):
     def arguments(self):
         self.parser.add_argument('--specimen_name', help='Only the groups of these specimens', nargs='+')
         self.parser.add_argument('--sample_group_name', help='Only these groups', nargs='+')
+        self.parser.add_argument('--sample_name', help='Only the groups holding any of these samples', nargs='+')
 
     def func(self, parsed_args):
         super().func(parsed_args)
@@ -43,6 +44,8 @@ class List(AddCMD):
             query["specimen_name"] = list(parsed_args.specimen_name)
         if parsed_args.sample_group_name:
             query["sample_group_name"] = list(parsed_args.sample_group_name)
+        if parsed_args.sample_name:
+            query["sample_name"] = list(parsed_args.sample_name)
         path = f'project/{self.project_id}/sample_groups'
         if query:
             path += f'?json={urllib.parse.quote(json.dumps(query))}'

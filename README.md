@@ -77,6 +77,8 @@ To list and edit the groups of samples analysed together (declared with `sample_
 
 ```bash
 pt-cli --url-root https://c3g-portal.dev-sd4h.ca --project MY-PROJECT sample_group list --specimen_name SPECIMEN-1
+# The groups a sample belongs to
+pt-cli --url-root https://c3g-portal.dev-sd4h.ca --project MY-PROJECT sample_group list --sample_name SAMPLE-1-1RT
 # Add samples (creates the group when it doesn't exist) and/or remove samples; a group left empty is deleted
 pt-cli --url-root https://c3g-portal.dev-sd4h.ca --project MY-PROJECT sample_group edit --name SPECIMEN-1_G1 --add SAMPLE-1-1RT
 pt-cli --url-root https://c3g-portal.dev-sd4h.ca --project MY-PROJECT sample_group edit --name SPECIMEN-1_G1 --remove SAMPLE-1-1DN
