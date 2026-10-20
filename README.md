@@ -69,19 +69,19 @@ per sample group, `<group>.samplesheet.csv`, for every group of the given specim
 DNA and RNA together unless you give `--nucleic_acid_type`:
 
 ```bash
-pt-cli --url-root https://c3g-portal.dev-sd4h.ca --project MOH-Q digest oncoanalyser_samplesheet --specimen_name MoHQ-CM-5-208 --endpoint abacus -o samplesheets/
-pt-cli --url-root https://c3g-portal.dev-sd4h.ca --project MOH-Q digest oncoanalyser_samplesheet --sample_group_name MoHQ-CM-5-208_G1 --endpoint abacus
+pt-cli --url-root https://c3g-portal.dev-sd4h.ca --project MY-PROJECT digest oncoanalyser_samplesheet --specimen_name SPECIMEN-1 --endpoint abacus -o samplesheets/
+pt-cli --url-root https://c3g-portal.dev-sd4h.ca --project MY-PROJECT digest oncoanalyser_samplesheet --sample_group_name SPECIMEN-1_G1 --endpoint abacus
 ```
 
 To list and edit the groups of samples analysed together (declared with `sample_group_name` at ingestion):
 
 ```bash
-pt-cli --url-root https://c3g-portal.dev-sd4h.ca --project MOH-Q sample_group list --specimen_name MoHQ-CM-5-208
+pt-cli --url-root https://c3g-portal.dev-sd4h.ca --project MY-PROJECT sample_group list --specimen_name SPECIMEN-1
 # Add samples (creates the group when it doesn't exist) and/or remove samples; a group left empty is deleted
-pt-cli --url-root https://c3g-portal.dev-sd4h.ca --project MOH-Q sample_group edit --name MoHQ-CM-5-208_G1 --add MoHQ-CM-5-208-596349-1RT
-pt-cli --url-root https://c3g-portal.dev-sd4h.ca --project MOH-Q sample_group edit --name MoHQ-CM-5-208_G1 --remove MoHQ-CM-5-208-596355-1DN
+pt-cli --url-root https://c3g-portal.dev-sd4h.ca --project MY-PROJECT sample_group edit --name SPECIMEN-1_G1 --add SAMPLE-1-1RT
+pt-cli --url-root https://c3g-portal.dev-sd4h.ca --project MY-PROJECT sample_group edit --name SPECIMEN-1_G1 --remove SAMPLE-1-1DN
 # Rename a group (its id is in 'sample_group list'); deprecate, delete and curate work the same way
-pt-cli --url-root https://c3g-portal.dev-sd4h.ca --data '{"modification": [{"table": "sample_group", "id": [1], "column": "name", "new": "MoHQ-CM-5-208_G3"}]}' edit
+pt-cli --url-root https://c3g-portal.dev-sd4h.ca --data '{"modification": [{"table": "sample_group", "id": [1], "column": "name", "new": "SPECIMEN-1_G3"}]}' edit
 ```
 
 ## Test the client on a local server (developer mode)
