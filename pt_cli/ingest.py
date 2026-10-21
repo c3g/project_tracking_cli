@@ -189,7 +189,7 @@ class DeliveryIngest(AddCMD):
 
     def arguments(self):
         self.parser.add_argument('--input-json', help="Json file containing all information to add data from a Delivery into the database", type=argparse.FileType('r')).complete = shtab.FILE  # type: ignore[attr-defined]
-        self.parser.add_argument('--delete', action='store_true', default=True, help="By default, delivery will delete the files from their original location after transfer. If you want to keep the original files, set this flag to False.")
+        self.parser.add_argument('--delete', action=argparse.BooleanOptionalAction, default=None, help="Mark the source locations of the delivered files deleted (the default), or keep them with --no-delete. Without either flag, a 'delete' key in the JSON applies.")
 
     @property
     def delivery(self):
@@ -210,7 +210,8 @@ class DeliveryIngest(AddCMD):
         self.project_from_payload(safe_json_loads(self.delivery_input))
 
         self.delivery_input = safe_json_loads(self.delivery_input)
-        self.delivery_input["delete"] = parsed_args.delete
+        if parsed_args.delete is not None:
+            self.delivery_input["delete"] = parsed_args.delete
         self.delivery_input = json.dumps(self.delivery_input, ensure_ascii=False, indent=4)
 
         response = self.delivery
