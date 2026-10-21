@@ -2,6 +2,8 @@
 
 pt-cli is the C3G database [client](https://github.com/c3g/project_tracking_cli). It communicates with [project tracking](https://github.com/c3g/project_tracking), the C3G database API.
 
+Python 3.11 or newer is required. The default development version is 3.14 (`.python-version`); CI tests 3.11 to 3.14.
+
 To install:
 
 ```bash
