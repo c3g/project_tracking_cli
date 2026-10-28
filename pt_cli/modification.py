@@ -82,9 +82,9 @@ class Delete(AddCMD):
     def arguments(self):
         self.parser.add_argument('--input-json', help="Json file containing all information to be deleted on the database", type=argparse.FileType('r')).complete = shtab.FILE  # type: ignore[attr-defined]
         self.parser.add_argument('--dry_run', action='store_true', default=False, help="If set, will only print the entries that will be curated without actually curating them.")
-        self.parser.add_argument('--cascade_down', help="Cascade delete, will delete all children of the entry and orphan", action='store_true', default=False)
-        self.parser.add_argument('--cascade_up', help="Cascade delete, will delete all parents of the entry and orphan", action='store_true', default=False)
-        self.parser.add_argument('--cascade', help="Cascade delete, will delete all parents and children of the entry and orphan", action='store_true', default=False)
+        self.parser.add_argument('--cascade_down', help="Also delete the rows below them whose parents are then all deleted: samples, readsets, files, locations, metrics, jobs, sample groups", action='store_true', default=False)
+        self.parser.add_argument('--cascade_up', help="Also delete a sample, specimen or file once all its readsets, samples or locations are deleted", action='store_true', default=False)
+        self.parser.add_argument('--cascade', help="Both --cascade_down and --cascade_up", action='store_true', default=False)
 
     @property
     def delete(self):
@@ -140,9 +140,9 @@ class UnDelete(AddCMD):
     def arguments(self):
         self.parser.add_argument('--input-json', help="Json file containing all information to be undeleted on the database", type=argparse.FileType('r')).complete = shtab.FILE  # type: ignore[attr-defined]
         self.parser.add_argument('--dry_run', action='store_true', default=False, help="If set, will only print the entries that will be curated without actually curating them.")
-        self.parser.add_argument('--cascade_down', help="Cascade undelete, will undelete all children of the entry and orphan", action='store_true', default=False)
-        self.parser.add_argument('--cascade_up', help="Cascade undelete, will undelete all parents of the entry and orphan", action='store_true', default=False)
-        self.parser.add_argument('--cascade', help="Cascade undelete, will undelete all parents and children of the entry and orphan", action='store_true', default=False)
+        self.parser.add_argument('--cascade_down', help="Also undelete the deleted rows below them", action='store_true', default=False)
+        self.parser.add_argument('--cascade_up', help="Also undelete their deleted sample, specimen or file (not their siblings)", action='store_true', default=False)
+        self.parser.add_argument('--cascade', help="Both --cascade_down and --cascade_up", action='store_true', default=False)
 
     @property
     def undelete(self):
@@ -198,9 +198,9 @@ class Deprecate(AddCMD):
     def arguments(self):
         self.parser.add_argument('--input-json', help="Json file containing all information to be deprecated on the database", type=argparse.FileType('r')).complete = shtab.FILE  # type: ignore[attr-defined]
         self.parser.add_argument('--dry_run', action='store_true', default=False, help="If set, will only print the entries that will be curated without actually curating them.")
-        self.parser.add_argument('--cascade_down', help="Cascade undelete, will undelete all children of the entry and orphan", action='store_true', default=False)
-        self.parser.add_argument('--cascade_up', help="Cascade undelete, will undelete all parents of the entry and orphan", action='store_true', default=False)
-        self.parser.add_argument('--cascade', help="Cascade undelete, will undelete all parents and children of the entry and orphan", action='store_true', default=False)
+        self.parser.add_argument('--cascade_down', help="Also deprecate the rows below them whose parents are then all deprecated: samples, readsets, files, locations, metrics, jobs, sample groups", action='store_true', default=False)
+        self.parser.add_argument('--cascade_up', help="Also deprecate a sample, specimen or file once all its readsets, samples or locations are deprecated", action='store_true', default=False)
+        self.parser.add_argument('--cascade', help="Both --cascade_down and --cascade_up", action='store_true', default=False)
 
     @property
     def deprecate(self):
@@ -256,9 +256,9 @@ class UnDeprecate(AddCMD):
     def arguments(self):
         self.parser.add_argument('--input-json', help="Json file containing all information to be undeprecated on the database", type=argparse.FileType('r')).complete = shtab.FILE  # type: ignore[attr-defined]
         self.parser.add_argument('--dry_run', action='store_true', default=False, help="If set, will only print the entries that will be curated without actually curating them.")
-        self.parser.add_argument('--cascade_down', help="Cascade undelete, will undelete all children of the entry and orphan", action='store_true', default=False)
-        self.parser.add_argument('--cascade_up', help="Cascade undelete, will undelete all parents of the entry and orphan", action='store_true', default=False)
-        self.parser.add_argument('--cascade', help="Cascade undelete, will undelete all parents and children of the entry and orphan", action='store_true', default=False)
+        self.parser.add_argument('--cascade_down', help="Also undeprecate the deprecated rows below them", action='store_true', default=False)
+        self.parser.add_argument('--cascade_up', help="Also undeprecate their deprecated sample, specimen or file (not their siblings)", action='store_true', default=False)
+        self.parser.add_argument('--cascade', help="Both --cascade_down and --cascade_up", action='store_true', default=False)
 
     @property
     def undeprecate(self):
@@ -314,9 +314,9 @@ class Curate(AddCMD):
     def arguments(self):
         self.parser.add_argument('--input-json', help="Json file containing all information to be curated from the database", type=argparse.FileType('r')).complete = shtab.FILE  # type: ignore[attr-defined]
         self.parser.add_argument('--dry_run', action='store_true', default=False, help="If set, will only print the entries that will be curated without actually curating them.")
-        self.parser.add_argument('--cascade_down', help="Cascade undelete, will undelete all children of the entry and orphan", action='store_true', default=False)
-        self.parser.add_argument('--cascade_up', help="Cascade undelete, will undelete all parents of the entry and orphan", action='store_true', default=False)
-        self.parser.add_argument('--cascade', help="Cascade undelete, will undelete all parents and children of the entry and orphan", action='store_true', default=False)
+        self.parser.add_argument('--cascade_down', help="Also curate the rows below them whose parents are then all curated: samples, readsets, files, locations, metrics, jobs, sample groups. Curate refuses to remove rows the request doesn't reach", action='store_true', default=False)
+        self.parser.add_argument('--cascade_up', help="Also curate a sample, specimen or file once all its readsets, samples or locations are curated", action='store_true', default=False)
+        self.parser.add_argument('--cascade', help="Both --cascade_down and --cascade_up", action='store_true', default=False)
 
     @property
     def curate(self):
