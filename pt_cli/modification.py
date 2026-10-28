@@ -43,7 +43,7 @@ class Edit(AddCMD):
 
     @property
     def edit(self):
-        return self.post('modification/edit', data=self.edit_input)
+        return self.post(f'project/{self.project_id}/modification/edit', data=self.edit_input)
 
     def func(self, parsed_args):
         super().func(parsed_args)
@@ -88,7 +88,7 @@ class Delete(AddCMD):
 
     @property
     def delete(self):
-        return self.post('modification/delete', data=self.delete_input)
+        return self.post(f'project/{self.project_id}/modification/delete', data=self.delete_input)
 
     def func(self, parsed_args):
         super().func(parsed_args)
@@ -146,7 +146,7 @@ class UnDelete(AddCMD):
 
     @property
     def undelete(self):
-        return self.post('modification/undelete', data=self.undelete_input)
+        return self.post(f'project/{self.project_id}/modification/undelete', data=self.undelete_input)
 
     def func(self, parsed_args):
         super().func(parsed_args)
@@ -204,7 +204,7 @@ class Deprecate(AddCMD):
 
     @property
     def deprecate(self):
-        return self.post('modification/deprecate', data=self.deprecate_input)
+        return self.post(f'project/{self.project_id}/modification/deprecate', data=self.deprecate_input)
 
     def func(self, parsed_args):
         super().func(parsed_args)
@@ -262,7 +262,7 @@ class UnDeprecate(AddCMD):
 
     @property
     def undeprecate(self):
-        return self.post('modification/undeprecate', data=self.undeprecate_input)
+        return self.post(f'project/{self.project_id}/modification/undeprecate', data=self.undeprecate_input)
 
     def func(self, parsed_args):
         super().func(parsed_args)
@@ -320,7 +320,7 @@ class Curate(AddCMD):
 
     @property
     def curate(self):
-        return self.post('modification/curate', data=self.curate_input)
+        return self.post(f'project/{self.project_id}/modification/curate', data=self.curate_input)
 
     def func(self, parsed_args):
         super().func(parsed_args)

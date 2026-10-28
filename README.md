@@ -93,7 +93,7 @@ pt-cli --url-root https://c3g-portal.dev-sd4h.ca --project MY-PROJECT sample_gro
 pt-cli --url-root https://c3g-portal.dev-sd4h.ca --project MY-PROJECT sample_group edit --name SPECIMEN-1_G1 --add SAMPLE-1-1RT
 pt-cli --url-root https://c3g-portal.dev-sd4h.ca --project MY-PROJECT sample_group edit --name SPECIMEN-1_G1 --remove SAMPLE-1-1DN
 # Rename a group (its id is in 'sample_group list'); deprecate, delete and curate work the same way
-pt-cli --url-root https://c3g-portal.dev-sd4h.ca --data '{"modification": [{"table": "sample_group", "id": [1], "column": "name", "new": "SPECIMEN-1_G3"}]}' edit
+pt-cli --url-root https://c3g-portal.dev-sd4h.ca --project MY-PROJECT --data '{"modification": [{"table": "sample_group", "id": [1], "column": "name", "new": "SPECIMEN-1_G3"}]}' edit
 ```
 
 ## Test the client on a local server (developer mode)
