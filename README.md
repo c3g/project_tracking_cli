@@ -96,6 +96,41 @@ pt-cli --url-root https://c3g-portal.dev-sd4h.ca --project MY-PROJECT sample_gro
 pt-cli --url-root https://c3g-portal.dev-sd4h.ca --project MY-PROJECT --data '{"modification": [{"table": "sample_group", "id": [1], "column": "name", "new": "SPECIMEN-1_G3"}]}' edit
 ```
 
+## Log in
+
+Today the API at c3g-portal is behind a Keycloak login: pt-cli asks for your username and password when needed.
+
+An API that checks COmanage tokens itself (`AUTH_MODE` `oidc` on the server) needs the `oidc` extra:
+`pip install '.[oidc]'`. Log in once per API:
+
+```bash
+pt-cli --url-root https://c3g-portal.dev-sd4h.ca login
+# To log in, open https://... and enter code: ABCD-1234
+```
+
+Open the URL in any browser, enter the code and log in with your institution. pt-cli keeps the token in
+`~/.config/pt_cli/tokens/<API host>.json` (only you can read it; `token_file` in `connect.yaml` changes it) and
+refreshes it by itself. In a terminal, any command logs you in when needed. Scripts and cron jobs never do: run
+`pt-cli login` in a terminal first.
+
+```bash
+pt-cli logout   # forget the token of this API
+pt-cli token    # print the access token, e.g. for Authorize in the API's /docs
+```
+
+What you can do depends on your COmanage groups, per database: read, ingest (and read), modify (edit, delete,
+deprecate, curate, sample groups; and the rest). Admins can do everything, including `admin create-project`.
+
+### Exit codes
+
+| Code | Meaning | What to do |
+|---|---|---|
+| 0 | Success, maybe with warnings | |
+| 1 | The request failed: bad data, unknown project, duplicate, server error | Read the error |
+| 2 | Unknown command or option | See `pt-cli <command> --help` |
+| 3 | Not logged in, or the login expired and can't be refreshed | `pt-cli login` in a terminal |
+| 4 | Logged in, but your groups don't give the role this needs on the project's database | Ask for the group in COmanage |
+
 ## Test the client on a local server (developer mode)
 Install pt-cli in dev mode, with pip's `-e` option. This mode applies your source code changes to the installation automatically.
 ```bash

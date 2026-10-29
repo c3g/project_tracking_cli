@@ -30,6 +30,10 @@ dependencies = [
     "shtab",
 ]
 
+[project.optional-dependencies]
+# Login to an API that checks COmanage tokens itself (AUTH_MODE 'oidc')
+oidc = ["c3g-oidc>=0.2.0"]
+
 [project.scripts]
 pt-cli =  "pt_cli.cli:main"
 

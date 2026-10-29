@@ -9,7 +9,7 @@ import urllib.parse
 import shtab
 import yaml
 
-from pt_cli.connect import Pt_Cli
+from pt_cli.connect import NotLoggedInError, Pt_Cli
 from pt_cli.admin import register_admin_commands
 from pt_cli.digest import register_digest_commands
 from pt_cli.ingest import register_ingest_commands
@@ -69,6 +69,8 @@ def main(args=None, set_logger=True):
     config = {
         "url_root": "https://c3g-portal.sd4h.ca",
         "session_file": "~/.pt_cli",
+        # Default: ~/.config/pt_cli/tokens/<API host>.json, one token per API
+        "token_file": None,
         "project": None,
         "user": None,
         "password": None
@@ -97,6 +99,8 @@ def main(args=None, set_logger=True):
         url_root._replace(scheme='http')
 
     if parsed.info:
+        if not config['token_file']:
+            config['token_file'] = f"~/.config/pt_cli/tokens/{url_root.netloc or 'default'}.json"
         sys.stdout.write('Config:\n')
         for key, value in config.items():
             if key == 'password' and value:
@@ -105,7 +109,11 @@ def main(args=None, set_logger=True):
         sys.exit(0)
 
     session_file = pathlib.Path(config['session_file']).expanduser()
-    connector_session = Pt_Cli(config['project'], config['user'], config['password'], parsed.quiet, url_root.geturl(), session_file=session_file)
+    token_file = pathlib.Path(
+        config['token_file'] or f"~/.config/pt_cli/tokens/{url_root.netloc or 'default'}.json"
+    ).expanduser()
+    connector_session = Pt_Cli(config['project'], config['user'], config['password'], parsed.quiet, url_root.geturl(),
+                               session_file=session_file, token_file=token_file)
 
 
     subparser = parser.add_subparsers(help='use the api routes directly')
@@ -166,6 +174,36 @@ def main(args=None, set_logger=True):
         add_help=False
     )
     parser_vocabulary.set_defaults(func=vocabulary)
+
+    def login(parsed_local):
+        connector_session.token.login()
+        return sys.stderr.write(f"Logged in to {connector_session.root}: token kept in {token_file}\n")
+
+    subparser.add_parser(
+        'login',
+        help="Log in to an API that checks tokens (COmanage): open the URL shown and enter the code. "
+             "Other commands log in by themselves in a terminal; scripts without one need this first.",
+        add_help=False
+    ).set_defaults(func=login)
+
+    def logout(parsed_local):
+        if connector_session.token.logout():
+            return sys.stderr.write(f"Logged out of {connector_session.root}: {token_file} deleted\n")
+        return sys.stderr.write(f"Not logged in to {connector_session.root}\n")
+
+    subparser.add_parser('logout', help='Forget the token of this API', add_help=False).set_defaults(func=logout)
+
+    def token(parsed_local):
+        access_token = connector_session.token.access_token(login=True)
+        if not access_token:
+            raise NotLoggedInError("Not logged in: run 'pt-cli login' in a terminal first.")
+        return sys.stdout.write(access_token)
+
+    subparser.add_parser(
+        'token',
+        help="Print the access token of this API, refreshed when needed, e.g. for Authorize in the API's /docs",
+        add_help=False
+    ).set_defaults(func=token)
 
     register_admin_commands(subparser=subparser, connection_obj=connector_session)
     register_digest_commands(subparser=subparser, connection_obj=connector_session)
