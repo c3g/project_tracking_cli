@@ -118,6 +118,9 @@ pt-cli logout   # forget the token of this API
 pt-cli token    # print the access token, e.g. for Authorize in the API's /docs
 ```
 
+After you join or leave a COmanage group, run `pt-cli login` again: a refreshed token keeps the groups you had
+when you logged in. Owning a group counts as being in it.
+
 What you can do depends on your COmanage groups, per database: read, ingest (and read), modify (edit, delete,
 deprecate, curate, sample groups; and the rest). Admins can do everything, including `admin create-project`.
 
