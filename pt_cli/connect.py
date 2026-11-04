@@ -63,7 +63,7 @@ class BearerToken():
             try:
                 from c3g_oidc.client import DeviceCodeSession
             except ImportError:
-                raise Error("This API needs a login, which needs the 'oidc' extra: pip install 'pt_cli[oidc]'")
+                raise Error("This API needs c3g-oidc, which pt-cli requires: reinstall pt-cli (pip install .)")
             self._session = DeviceCodeSession(
                 self.root,
                 self.CLIENT_ID,
@@ -81,8 +81,8 @@ class BearerToken():
 
     def login(self):
         """Log in with a device code; return the access token"""
-        from c3g_oidc.client import DeviceLoginError
         session = self.session()
+        from c3g_oidc.client import DeviceLoginError
         try:
             return session.login()
         except (DeviceLoginError, requests.RequestException, ValueError, KeyError) as error:
@@ -95,8 +95,8 @@ class BearerToken():
         """
         if not os.path.exists(self.token_file) and not login:
             return None
-        from c3g_oidc.client import DeviceLoginError
         session = self.session()
+        from c3g_oidc.client import DeviceLoginError
         try:
             return session.get_access_token(interactive=False)
         except DeviceLoginError:

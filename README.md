@@ -100,8 +100,8 @@ pt-cli --url-root https://c3g-portal.dev-sd4h.ca --project MY-PROJECT --data '{"
 
 Today the API at c3g-portal is behind a Keycloak login: pt-cli asks for your username and password when needed.
 
-An API that checks COmanage tokens itself (`AUTH_MODE` `oidc` on the server) needs the `oidc` extra:
-`pip install '.[oidc]'`. Log in once per API:
+An API that checks COmanage tokens itself (`AUTH_MODE` `oidc` on the server) uses `c3g-oidc`, installed with
+pt-cli. Log in once per API:
 
 ```bash
 pt-cli --url-root https://c3g-portal.dev-sd4h.ca login

@@ -28,11 +28,13 @@ dependencies = [
     "beautifulsoup4>=4.12",
     "html5lib",
     "shtab",
+    # Login to an API that checks COmanage tokens itself (AUTH_MODE 'oidc')
+    "c3g-oidc>=0.2.0",
 ]
 
 [project.optional-dependencies]
-# Login to an API that checks COmanage tokens itself (AUTH_MODE 'oidc')
-oidc = ["c3g-oidc>=0.2.0"]
+# Kept for 'pip install pt_cli[oidc]' in older docs and scripts: c3g-oidc is now required
+oidc = []
 
 [project.scripts]
 pt-cli =  "pt_cli.cli:main"
