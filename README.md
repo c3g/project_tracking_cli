@@ -124,6 +124,19 @@ when you logged in. Owning a group counts as being in it.
 What you can do depends on your COmanage groups, per database: read, ingest (and read), modify (edit, delete,
 deprecate, curate, sample groups; and the rest). Admins can do everything, including `admin create-project`.
 
+### Busy database
+
+The API runs writes to a database one at a time. When another write to the same database runs too long, the API
+refuses yours (nothing is done) and says when to try again. pt-cli then waits and sends it again by itself, for 10
+minutes at most:
+
+```
+WARNING:Database busy with another write: retrying in 30 s (attempt 2)
+```
+
+`--retry-for SECONDS` (or `retry_for:` in `connect.yaml`) changes the 10 minutes; `0` never retries. Reads are never
+refused this way.
+
 ### Exit codes
 
 | Code | Meaning | What to do |
@@ -133,6 +146,7 @@ deprecate, curate, sample groups; and the rest). Admins can do everything, inclu
 | 2 | Unknown command or option | See `pt-cli <command> --help` |
 | 3 | Not logged in, or the login expired and can't be refreshed | `pt-cli login` in a terminal |
 | 4 | Logged in, but your groups don't give the role this needs on the project's database | Ask for the group in COmanage |
+| 5 | A write's database stayed busy with other writes for longer than `--retry-for`: nothing was done | Run it again later |
 
 ## Test the client on a local server (developer mode)
 Install pt-cli in dev mode, with pip's `-e` option. This mode applies your source code changes to the installation automatically.

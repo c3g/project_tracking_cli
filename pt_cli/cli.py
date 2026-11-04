@@ -39,6 +39,9 @@ def get_main_parser(args=None):
     parser.add_argument('--loglevel', help='Set log level', choices=list(logging._levelToName.values()), default='INFO')
     parser.add_argument('--info', help='Get current client config', action='store_true')
     parser.add_argument('-q', '--quiet', help='Writes Warnings to a file instead of stdout', action='store_true')
+    parser.add_argument('--retry-for', type=int, default=None, metavar='SECONDS',
+                        help='How long to keep retrying a write while its database is busy with another one '
+                             '(default 600, 0: never)')
     parser.add_argument('-v', '--version', help='Show version', action="version", version=f'{__version__}')
 
     return parser
@@ -72,6 +75,8 @@ def main(args=None, set_logger=True):
         # Default: ~/.config/pt_cli/tokens/<API host>.json, one token per API
         "token_file": None,
         "project": None,
+        # Seconds to retry a write refused because its database is busy with another write
+        "retry_for": 600,
         "user": None,
         "password": None
         }
@@ -91,6 +96,8 @@ def main(args=None, set_logger=True):
     # Command line overwrite
     if parsed.project:
         config['project'] = parsed.project
+    if parsed.retry_for is not None:
+        config['retry_for'] = parsed.retry_for
     if parsed.url_root:
         config['url_root'] = parsed.url_root
     url_root = urllib.parse.urlparse(config['url_root'])
@@ -114,6 +121,7 @@ def main(args=None, set_logger=True):
     ).expanduser()
     connector_session = Pt_Cli(config['project'], config['user'], config['password'], parsed.quiet, url_root.geturl(),
                                session_file=session_file, token_file=token_file)
+    connector_session.retry_for = int(config['retry_for'])
 
 
     subparser = parser.add_subparsers(help='use the api routes directly')

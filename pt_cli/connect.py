@@ -6,6 +6,7 @@ import json
 import os
 import pickle
 import re
+import time
 import weakref
 import logging
 
@@ -33,6 +34,10 @@ class BadRequestError(Error):
 class NotLoggedInError(Error):
     """The API needs a token and pt-cli has none that works: run 'pt-cli login'"""
     exit_code = 3
+
+class BusyError(Error):
+    """The database stayed busy with other writes for longer than --retry-for: nothing was done"""
+    exit_code = 5
 
 class NotAllowedError(Error):
     """The token is valid but its groups don't give the role the route needs"""
@@ -142,6 +147,8 @@ class OAuthNego():
         self.user = None
         self.password = None
         self.quiet = False
+        # Seconds a write refused because its database is busy (503 with Retry-After) is retried for; 0: never
+        self.retry_for = 600
         # Initialise session from file
         self.session_file = session_file
         # if session_file.is_file():
@@ -235,6 +242,25 @@ class OAuthNego():
             return response.text
 
     def request(self, method, path, data=None):
+        """
+        Send the request; while the API answers 503 with Retry-After (another write to the same database is running:
+        nothing was done), wait and send it again, for retry_for seconds at most.
+        """
+        deadline = time.monotonic() + self.retry_for
+        attempt = 1
+        while True:
+            response = self.request_once(method, path, data)
+            delay = response.headers.get('Retry-After', '')
+            if response.status_code != 503 or not delay.isdigit():
+                return self.maybe_json(response.text)
+            if time.monotonic() + int(delay) > deadline:
+                raise BusyError(f"{self.refusal(response)} (Gave up after retrying for {self.retry_for} s: --retry-for.)")
+            attempt += 1
+            logger.warning(f"Database busy with another write: retrying in {delay} s (attempt {attempt})")
+            time.sleep(int(delay))
+
+    def request_once(self, method, path, data=None):
+        """Send the request once, logging in when needed: the response, or an Error."""
         url = f"{self.root}/{path}"
         response = self.s.request(method, url, data=data, headers=self.token.headers())
         # Behind oauth2-proxy (Keycloak): without the session cookie we get a redirect to the login page
@@ -251,8 +277,7 @@ class OAuthNego():
                 raise NotLoggedInError(self.refusal(response))
         if response.status_code == 403:
             raise NotAllowedError(self.refusal(response))
-
-        return self.maybe_json(response.text)
+        return response
 
     def get(self, path):
         return self.request('GET', path)
