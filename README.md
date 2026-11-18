@@ -16,15 +16,15 @@ pt-cli -h
 ```
 
 
-To query the api at c3g-portal.dev-sd4h.ca:
+To query the dev API at project-tracking.c3g-app.dev-sd4h.ca:
 
 ```bash
-pt-cli --url-root https://c3g-portal.dev-sd4h.ca help
+pt-cli --url-root https://project-tracking.c3g-app.dev-sd4h.ca help
 ```
 
 To access a route from the `help` command list, for example `/project`, run this command:
 ```bash 
-pt-cli --url-root https://c3g-portal.dev-sd4h.ca route /project
+pt-cli --url-root https://project-tracking.c3g-app.dev-sd4h.ca route /project
 ```
 
 The `route` command selects the HTTP method:
@@ -35,26 +35,26 @@ If an endpoint needs a specific HTTP verb, you can set it with `--method`.
 
 ```bash
 # Force POST even without a payload
-pt-cli --url-root https://c3g-portal.dev-sd4h.ca route /admin/create_project/cphi-test --method POST
+pt-cli --url-root https://project-tracking.c3g-app.dev-sd4h.ca route /admin/create_project/cphi-test --method POST
 
 # Explicit GET
-pt-cli --url-root https://c3g-portal.dev-sd4h.ca route /project --method GET
+pt-cli --url-root https://project-tracking.c3g-app.dev-sd4h.ca route /project --method GET
 ```
 
 To create a project with optional JSON metadata, use the dedicated command:
 
 ```bash
 # Create/fetch project by name only
-pt-cli --url-root https://c3g-portal.dev-sd4h.ca admin create-project --name cphi-test
+pt-cli --url-root https://project-tracking.c3g-app.dev-sd4h.ca admin create-project --name cphi-test
 
 # Create/fetch project with external metadata sent as JSON body
-pt-cli --url-root https://c3g-portal.dev-sd4h.ca admin create-project --name cphi-test --ext-id 123 --ext-src lims
+pt-cli --url-root https://project-tracking.c3g-app.dev-sd4h.ca admin create-project --name cphi-test --ext-id 123 --ext-src lims
 ```
 
 Equivalent raw route form:
 
 ```bash
-pt-cli --url-root https://c3g-portal.dev-sd4h.ca --data '{"ext_id":123,"ext_src":"lims"}' route /admin/create_project/cphi-test --method POST
+pt-cli --url-root https://project-tracking.c3g-app.dev-sd4h.ca --data '{"ext_id":123,"ext_src":"lims"}' route /admin/create_project/cphi-test --method POST
 ```
 
 Commands working on one project need it: give `--project`, or set `project:` in `./connect.yaml` or
@@ -62,7 +62,7 @@ Commands working on one project need it: give `--project`, or set `project:` in 
 `project_name` of the JSON. Project names are matched ignoring case, so `--project my-project` finds `MY-PROJECT`.
 
 ```bash
-pt-cli --url-root https://c3g-portal.dev-sd4h.ca --project MY-PROJECT ingest run_processing --input-json run_processing.json
+pt-cli --url-root https://project-tracking.c3g-app.dev-sd4h.ca --project MY-PROJECT ingest run_processing --input-json run_processing.json
 ```
 
 To list the values the server accepts for controlled fields, run this command. It shows the enum values
@@ -70,7 +70,7 @@ To list the values the server accepts for controlled fields, run this command. I
 (`operation_name`, `operation_pipeline`, `operation_protocol`):
 
 ```bash
-pt-cli --url-root https://c3g-portal.dev-sd4h.ca vocabulary
+pt-cli --url-root https://project-tracking.c3g-app.dev-sd4h.ca vocabulary
 ```
 
 
@@ -79,32 +79,30 @@ per sample group, `<group>.samplesheet.csv`, for every group of the given specim
 DNA and RNA together unless you give `--nucleic_acid_type`:
 
 ```bash
-pt-cli --url-root https://c3g-portal.dev-sd4h.ca --project MY-PROJECT digest oncoanalyser_samplesheet --specimen_name SPECIMEN-1 --endpoint abacus -o samplesheets/
-pt-cli --url-root https://c3g-portal.dev-sd4h.ca --project MY-PROJECT digest oncoanalyser_samplesheet --sample_group_name SPECIMEN-1_G1 --endpoint abacus
+pt-cli --url-root https://project-tracking.c3g-app.dev-sd4h.ca --project MY-PROJECT digest oncoanalyser_samplesheet --specimen_name SPECIMEN-1 --endpoint abacus -o samplesheets/
+pt-cli --url-root https://project-tracking.c3g-app.dev-sd4h.ca --project MY-PROJECT digest oncoanalyser_samplesheet --sample_group_name SPECIMEN-1_G1 --endpoint abacus
 ```
 
 To list and edit the groups of samples analysed together (declared with `sample_group_name` at ingestion):
 
 ```bash
-pt-cli --url-root https://c3g-portal.dev-sd4h.ca --project MY-PROJECT sample_group list --specimen_name SPECIMEN-1
+pt-cli --url-root https://project-tracking.c3g-app.dev-sd4h.ca --project MY-PROJECT sample_group list --specimen_name SPECIMEN-1
 # The groups a sample belongs to
-pt-cli --url-root https://c3g-portal.dev-sd4h.ca --project MY-PROJECT sample_group list --sample_name SAMPLE-1-1RT
+pt-cli --url-root https://project-tracking.c3g-app.dev-sd4h.ca --project MY-PROJECT sample_group list --sample_name SAMPLE-1-1RT
 # Add samples (creates the group when it doesn't exist) and/or remove samples; a group left empty is deleted
-pt-cli --url-root https://c3g-portal.dev-sd4h.ca --project MY-PROJECT sample_group edit --name SPECIMEN-1_G1 --add SAMPLE-1-1RT
-pt-cli --url-root https://c3g-portal.dev-sd4h.ca --project MY-PROJECT sample_group edit --name SPECIMEN-1_G1 --remove SAMPLE-1-1DN
+pt-cli --url-root https://project-tracking.c3g-app.dev-sd4h.ca --project MY-PROJECT sample_group edit --name SPECIMEN-1_G1 --add SAMPLE-1-1RT
+pt-cli --url-root https://project-tracking.c3g-app.dev-sd4h.ca --project MY-PROJECT sample_group edit --name SPECIMEN-1_G1 --remove SAMPLE-1-1DN
 # Rename a group (its id is in 'sample_group list'); deprecate, delete and curate work the same way
-pt-cli --url-root https://c3g-portal.dev-sd4h.ca --project MY-PROJECT --data '{"modification": [{"table": "sample_group", "id": [1], "column": "name", "new": "SPECIMEN-1_G3"}]}' edit
+pt-cli --url-root https://project-tracking.c3g-app.dev-sd4h.ca --project MY-PROJECT --data '{"modification": [{"table": "sample_group", "id": [1], "column": "name", "new": "SPECIMEN-1_G3"}]}' edit
 ```
 
 ## Log in
 
-Today the API at c3g-portal is behind a Keycloak login: pt-cli asks for your username and password when needed.
-
-An API that checks COmanage tokens itself (`AUTH_MODE` `oidc` on the server) uses `c3g-oidc`, installed with
-pt-cli. Log in once per API:
+The API checks COmanage tokens itself (`AUTH_MODE` `oidc` on the server), with `c3g-oidc`, installed with pt-cli.
+Without `--url-root`, pt-cli uses the production API, `https://project-tracking.c3g-app.sd4h.ca`. Log in once per API:
 
 ```bash
-pt-cli --url-root https://c3g-portal.dev-sd4h.ca login
+pt-cli --url-root https://project-tracking.c3g-app.dev-sd4h.ca login
 # To log in, open https://... and enter code: ABCD-1234
 ```
 
@@ -123,6 +121,13 @@ when you logged in. Owning a group counts as being in it.
 
 What you can do depends on your COmanage groups, per database: read, ingest (and read), modify (edit, delete,
 deprecate, curate, sample groups; and the rest). Admins can do everything, including `admin create-project`.
+
+### Robots (cron jobs, Jenkins)
+
+**For now, a person logs in for the job.** CILogon doesn't allow client credentials yet. Run `pt-cli login` once, as
+the job's account, in a terminal. pt-cli then refreshes the token without a terminal until the refresh token expires
+(30 days on the test registry), and several commands at once share it. When it expires, the job's commands exit with
+code 3: alert on it, and log in again. The job has your rights, and the API's log shows your name for its requests.
 
 ### Busy database
 
@@ -147,6 +152,7 @@ refused this way.
 | 3 | Not logged in, or the login expired and can't be refreshed | `pt-cli login` in a terminal |
 | 4 | Logged in, but your groups don't give the role this needs on the project's database | Ask for the group in COmanage |
 | 5 | A write's database stayed busy with other writes for longer than `--retry-for`: nothing was done | Run it again later |
+| 6 | No API answers at `--url-root`, or the path isn't one of its routes | Use the API's address alone, e.g. `https://project-tracking.c3g-app.sd4h.ca` |
 
 ## Test the client on a local server (developer mode)
 Install pt-cli in dev mode, with pip's `-e` option. This mode applies your source code changes to the installation automatically.

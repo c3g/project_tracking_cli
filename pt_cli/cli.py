@@ -70,7 +70,7 @@ def main(args=None, set_logger=True):
     # Cli Configuration setup
     # Default
     config = {
-        "url_root": "https://c3g-portal.sd4h.ca",
+        "url_root": "https://project-tracking.c3g-app.sd4h.ca",
         "session_file": "~/.pt_cli",
         # Default: ~/.config/pt_cli/tokens/<API host>.json, one token per API
         "token_file": None,

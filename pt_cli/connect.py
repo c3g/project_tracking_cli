@@ -44,6 +44,15 @@ class NotAllowedError(Error):
     exit_code = 4
 
 
+class WrongUrlError(Error):
+    """No API answers at --url-root, or the path isn't one of its routes: nothing was sent to the API"""
+    exit_code = 6
+
+
+URL_HINT = ("Check --url-root (or url_root in ~/.config/pt_cli/connect.yaml): the API's address alone, "
+            "e.g. https://project-tracking.c3g-app.sd4h.ca")
+
+
 class BearerToken():
     """
     The COmanage token of an API with AUTH_MODE 'oidc'. pt-cli logs in with a device code through the API's
@@ -259,20 +268,40 @@ class OAuthNego():
             logger.warning(f"Database busy with another write: retrying in {delay} s (attempt {attempt})")
             time.sleep(int(delay))
 
+    def send(self, method, url, **kwargs):
+        """One HTTP request: the response, or WrongUrlError when no server answers at url (not a traceback)"""
+        try:
+            return self.s.request(method, url, **kwargs)
+        except requests.exceptions.SSLError:
+            reason = "its TLS certificate isn't valid (is it the API?)"
+        except requests.exceptions.Timeout:
+            reason = "it didn't answer in time"
+        except requests.exceptions.ConnectionError:
+            reason = "no server answers at this name and port"
+        except requests.RequestException as error:
+            # e.g. an address without http(s)://
+            reason = str(error)
+        raise WrongUrlError(f"Can't reach the API at {self.root}: {reason}. {URL_HINT}")
+
     def request_once(self, method, path, data=None):
         """Send the request once, logging in when needed: the response, or an Error."""
         url = f"{self.root}/{path}"
-        response = self.s.request(method, url, data=data, headers=self.token.headers())
+        response = self.send(method, url, data=data, headers=self.token.headers())
+        # The API answers its errors in its envelope (400, 409): a bare 404 or 405 is a wrong address or path
+        if response.status_code in (404, 405) and "DB_ACTION_ERROR" not in response.text:
+            raise WrongUrlError(
+                f"{method} {url} isn't a route of the API (HTTP {response.status_code}): check the path. {URL_HINT}"
+            )
         # Behind oauth2-proxy (Keycloak): without the session cookie we get a redirect to the login page
         if self.REDIRECT in response.url:
             self.connect()
-            response = self.s.request(method, url, data=data)
+            response = self.send(method, url, data=data)
         # The API checks tokens itself (AUTH_MODE 'oidc'): log in when someone is at the terminal
         if response.status_code == 401 and response.headers.get('WWW-Authenticate', '').startswith('Bearer'):
             if not self.token.interactive():
                 raise NotLoggedInError(f"{self.refusal(response)} (No terminal here to log in from.)")
             self.token.login()
-            response = self.s.request(method, url, data=data, headers=self.token.headers())
+            response = self.send(method, url, data=data, headers=self.token.headers())
             if response.status_code == 401:
                 raise NotLoggedInError(self.refusal(response))
         if response.status_code == 403:
