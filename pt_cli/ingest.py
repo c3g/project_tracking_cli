@@ -56,6 +56,7 @@ class RunProcessing(AddCMD):
     def arguments(self):
         self.parser.add_argument('--input-json', help="Json file containing all information to add data from Run Processing into the database", type=argparse.FileType('r')).complete = shtab.FILE  # type: ignore[attr-defined]
         self.parser.add_argument('--force', action='store_true', default=False, help="Force ingestion, bypassing certain validation checks")
+        self.parser.add_argument('--allow-missing-md5sum', action='store_true', default=False, help="Ingest files without 'file_md5sum' (only for files no longer on disk, e.g. JSON rebuilt for past runs). Without it they are refused, even with --force; a malformed md5sum is always refused. A true 'allow_missing_md5sum' key in the JSON does the same.")
 
     @property
     def run_processing(self):
@@ -78,6 +79,8 @@ class RunProcessing(AddCMD):
 
         self.run_processing_input = safe_json_loads(self.run_processing_input)
         self.run_processing_input["force"] = parsed_args.force
+        if parsed_args.allow_missing_md5sum:
+            self.run_processing_input["allow_missing_md5sum"] = True
         self.run_processing_input = json.dumps(self.run_processing_input, ensure_ascii=False, indent=4)
 
         response = self.run_processing
@@ -144,6 +147,7 @@ class Analysis(AddCMD):
     def arguments(self):
         self.parser.add_argument('--input-json', help="Json file containing all information to add an analysis operation (e.g. a GenPipes run) into the database", type=argparse.FileType('r')).complete = shtab.FILE  # type: ignore[attr-defined]
         self.parser.add_argument('--force', action='store_true', default=False, help="Force ingestion, bypassing certain validation checks")
+        self.parser.add_argument('--allow-missing-md5sum', action='store_true', default=False, help="Ingest files without 'file_md5sum' (only for files no longer on disk, e.g. JSON rebuilt for past runs). Without it they are refused, even with --force; a malformed md5sum is always refused. A true 'allow_missing_md5sum' key in the JSON does the same.")
 
     @property
     def analysis(self):
@@ -165,6 +169,8 @@ class Analysis(AddCMD):
 
         self.analysis_input = safe_json_loads(self.analysis_input)
         self.analysis_input["force"] = parsed_args.force
+        if parsed_args.allow_missing_md5sum:
+            self.analysis_input["allow_missing_md5sum"] = True
         self.analysis_input = json.dumps(self.analysis_input, ensure_ascii=False, indent=4)
 
         response = self.analysis
