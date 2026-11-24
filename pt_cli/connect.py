@@ -20,16 +20,34 @@ class Error(Exception):
     """An error that ends pt-cli: the message goes to stderr and the exit code is exit_code"""
     exit_code = 1
 
-    def __init__(self, msg):
+    def __init__(self, msg, status=None):
+        # With the HTTP status of the API's answer, when there is one
+        name = f"{type(self).__name__} (HTTP {status})" if status else type(self).__name__
         if isinstance(msg, list):
-            self.args = (f"{type(self).__name__}: \n{chr(10).join(msg)}",)
+            self.args = (f"{name}: \n{chr(10).join(msg)}",)
         else:
-            self.args = (f"{type(self).__name__}: {msg}",)
+            self.args = (f"{name}: {msg}",)
         sys.stderr.write(f"{self.args[0]}\n")
         sys.exit(self.exit_code)
 
 class BadRequestError(Error):
-    """docstring for BadRequestError"""
+    """The API refused the request (4xx): fix what the message says"""
+
+class ConflictError(BadRequestError):
+    """The request conflicts with what the database holds (409), e.g. readsets already ingested"""
+
+class ServerError(BadRequestError):
+    """The API or its database failed (5xx), not the request: report the message and its reference"""
+    exit_code = 7
+
+
+def refused_error(status):
+    """The Error for an API answer with this HTTP status"""
+    if status and status >= 500:
+        return ServerError
+    if status == 409:
+        return ConflictError
+    return BadRequestError
 
 class NotLoggedInError(Error):
     """The API needs a token and pt-cli has none that works: run 'pt-cli login'"""
@@ -210,12 +228,12 @@ class OAuthNego():
         self.save_session(self.session_file, self.s)
         return connect
 
-    def maybe_json(self, data):
+    def maybe_json(self, data, status=None):
         try:
             loads = json.loads(data)
             if isinstance(loads, dict):
                 if loads.get("DB_ACTION_ERROR"):
-                    raise BadRequestError(loads.get("DB_ACTION_ERROR"))
+                    raise refused_error(status)(loads.get("DB_ACTION_ERROR"), status)
                 if loads.get("DB_ACTION_WARNING"):
                     db_action_warning = loads.get("DB_ACTION_WARNING")
                     if isinstance(db_action_warning, list):
@@ -238,7 +256,7 @@ class OAuthNego():
                 elif soup.get_text().startswith("Welcome"):
                     sys.stdout.write(soup.get_text())
                 else:
-                    raise BadRequestError(soup.get_text())
+                    raise refused_error(status)(soup.get_text(), status)
             return data
 
     @staticmethod
@@ -261,7 +279,7 @@ class OAuthNego():
             response = self.request_once(method, path, data)
             delay = response.headers.get('Retry-After', '')
             if response.status_code != 503 or not delay.isdigit():
-                return self.maybe_json(response.text)
+                return self.maybe_json(response.text, response.status_code)
             if time.monotonic() + int(delay) > deadline:
                 raise BusyError(f"{self.refusal(response)} (Gave up after retrying for {self.retry_for} s: --retry-for.)")
             attempt += 1

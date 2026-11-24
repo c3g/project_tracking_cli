@@ -147,7 +147,7 @@ refused this way.
 | Code | Meaning | What to do |
 |---|---|---|
 | 0 | Success, maybe with warnings | |
-| 1 | The request failed: bad data, unknown project, duplicate, server error | Read the error |
+| 1 | The API refused the request: bad data, unknown project (`BadRequestError (HTTP 400)`), duplicate (`ConflictError (HTTP 409)`) | Read the error and fix the request |
 | 2 | Unknown command or option | See `pt-cli <command> --help` |
 | 3 | Not logged in, or the login expired and can't be refreshed | `pt-cli login` in a terminal |
 | 4 | Logged in, but your groups don't give the role this needs on the project's database | Ask for the group in COmanage |
@@ -174,6 +174,7 @@ pt-cli --url-root http://127.0.0.1:5000 help
 pt-cli --url-root http://127.0.0.1:5000 route /admin/create_project/my-project --method POST
 # Creating a project with metadata
 pt-cli --url-root http://127.0.0.1:5000 admin create-project --name my-project --ext-id 1 --ext-src lims
+| 7 | The API or its database failed (`ServerError (HTTP 500)`), not the request | Report the error with its reference and your payload; check what was saved before sending it again |
 # Should return
 # {"creation": "2023-04-13T13:50:39.781030", "id": 1, "name": "MY-PROJECT", "tablename": "project"}
 # Checking what projects are available
